@@ -96,14 +96,28 @@ export function calculateCompatibility(userProfile, song) {
   let badgeClass = '';
   let reason = '';
   let recommendedKey = 0;
+  let isOctaveDown = false;
 
-  // おすすめキー調整（地声最高音を基準に、曲最高音を収めるためのキー）
+  // おすすめキー調整（カラオケ機械の上限 -6 〜 +6 に準拠）
   if (highDiff > 0) {
-    recommendedKey = -highDiff;
+    if (highDiff <= 6) {
+      recommendedKey = -highDiff;
+    } else {
+      // 7半音以上高い曲（女性曲を男性が歌う場合など）は1オクターブ下げ（オク下）を考慮
+      const octaveShift = 12 - highDiff;
+      if (octaveShift >= 0 && octaveShift <= 6) {
+        isOctaveDown = true;
+        recommendedKey = octaveShift;
+      } else {
+        recommendedKey = -6;
+      }
+    }
   } else if (highDiff < -4) {
-    // 曲が低すぎる場合はキー上げ推奨
-    recommendedKey = Math.min(4, Math.abs(highDiff) - 2);
+    // 曲が低すぎる場合はキー上げ推奨（最大+6）
+    recommendedKey = Math.min(6, Math.abs(highDiff) - 2);
   }
+
+  recommendedKey = Math.max(-6, Math.min(6, recommendedKey));
 
   // 判定ロジック
   if (highDiff <= 0 && lowDiff >= 0) {
@@ -118,14 +132,19 @@ export function calculateCompatibility(userProfile, song) {
     title = 'やや高め';
     badgeClass = 'bg-amber-500/20 text-amber-400 border-amber-500/30';
     reason = `あなたの最高音(${userProfile.chest_high})より曲の最高音が${highDiff}半音高いため、サビの高音部分は少し張る必要があります。キーを${recommendedKey}にするか、少しの高音練習で歌える範囲です。`;
-  } else if (highDiff >= 3 && highDiff <= 5) {
+  } else if (highDiff >= 3 && highDiff <= 6) {
     title = '高音練習向け';
     badgeClass = 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30';
     reason = `あなたの最高音より${highDiff}音(半音)高く、現状では高音がきつく感じやすい曲です。キーを${recommendedKey}に下げるか、高音域を広げるステップアップ練習にぴったりです。`;
-  } else if (highDiff > 5) {
-    title = '難易度高め';
-    badgeClass = 'bg-rose-500/20 text-rose-400 border-rose-500/30';
-    reason = `曲の最高音(${song.highest_note})が地声最高音より${highDiff}半音離れており、原曲キーの難易度はかなり高めです。キーを${recommendedKey}前後下げるか、ファルセットの強化が必要です。`;
+  } else if (highDiff > 6) {
+    title = isOctaveDown ? 'オク下で歌いやすい' : '難易度高め';
+    badgeClass = isOctaveDown ? 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' : 'bg-rose-500/20 text-rose-400 border-rose-500/30';
+    if (isOctaveDown) {
+      const keyText = recommendedKey === 0 ? '原曲キー (±0)' : `キー +${recommendedKey}`;
+      reason = `曲の最高音(${song.highest_note})が地声最高音よりかなり高いため、カラオケ定番の「1オクターブ下（オク下）＋${keyText}」にすると、地声で心地よく歌えます！`;
+    } else {
+      reason = `曲の最高音(${song.highest_note})が地声最高音より${highDiff}半音離れており、原曲キーの難易度はかなり高めです。カラオケ上限のキー-6に下げるか、ファルセットの強化が必要です。`;
+    }
   } else if (lowDiff < 0) {
     title = '低音練習向け';
     badgeClass = 'bg-blue-500/20 text-blue-400 border-blue-500/30';
@@ -141,6 +160,7 @@ export function calculateCompatibility(userProfile, song) {
     badgeClass,
     reason,
     recommendedKey,
+    isOctaveDown,
     highDiff,
     lowDiff,
     songHighMidi: songHigh,
