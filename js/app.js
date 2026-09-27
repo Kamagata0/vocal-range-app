@@ -819,7 +819,7 @@
         notes.forEach(n => {
           const opt = document.createElement('option');
           opt.value = n.name;
-          opt.textContent = `${n.name} (${n.karaoke})`;
+          opt.textContent = `${n.karaoke} (${n.name})`;
           sel.appendChild(opt);
         });
       });
@@ -1089,7 +1089,7 @@
               </div>
               <div class="text-right">
                 <span class="text-[10px] bg-purple-500/20 text-purple-300 font-bold px-2 py-0.5 rounded-full border border-purple-500/30">
-                  最高: ${log.highest_note}
+                  最高: ${formatKaraokeNote(log.highest_note)} (${log.highest_note})
                 </span>
               </div>
             </div>
@@ -1176,7 +1176,7 @@
             legend: { display: false },
             tooltip: {
               callbacks: {
-                label: (context) => `最高音: ${midiToNote(context.parsed.y)} (${getKaraokeNoteName(context.parsed.y)})`
+                label: (context) => `最高音: ${getKaraokeNoteName(context.parsed.y)} (${midiToNote(context.parsed.y)})`
               }
             }
           },
@@ -1191,7 +1191,7 @@
                 color: '#94a3b8',
                 font: { size: 10 },
                 stepSize: 2,
-                callback: (val) => midiToNote(val)
+                callback: (val) => getKaraokeNoteName(val) || midiToNote(val)
               }
             }
           }
