@@ -67,6 +67,10 @@ function autoCorrelate(buf, sampleRate) {
       maxpos = i;
     }
   }
+
+  // 周期的（音程感があるか）の厳密判定：息や摩擦音などの非周期ノイズをカット
+  if (c[0] <= 0 || (maxval / c[0]) < 0.78) return -1;
+
   let T0 = maxpos;
 
   // 放物線補間（周波数の微調整）
@@ -110,17 +114,19 @@ export async function startPitchDetection(onPitchDetected, onError) {
       analyser.getFloatTimeDomainData(buffer);
       const freq = autoCorrelate(buffer, audioContext.sampleRate);
 
-      // 人間の通常の発声周波数（約65Hz [C2] 〜 1200Hz [D6]）の範囲のみ採用
-      if (freq !== -1 && freq >= 60 && freq <= 1300) {
+      // 人間の通常の発声周波数（約65Hz [C2] 〜 1100Hz [C6]）の範囲のみ採用
+      if (freq !== -1 && freq >= 65 && freq <= 1100) {
         const midi = frequencyToMidi(freq);
-        const noteName = midiToNote(midi);
-        const karaokeName = getKaraokeNoteName(midi);
-        onPitchDetected({
-          frequency: Math.round(freq),
-          midi,
-          noteName,
-          karaokeName
-        });
+        if (midi >= 36 && midi <= 84) {
+          const noteName = midiToNote(midi);
+          const karaokeName = getKaraokeNoteName(midi);
+          onPitchDetected({
+            frequency: Math.round(freq),
+            midi,
+            noteName,
+            karaokeName
+          });
+        }
       }
       rafId = requestAnimationFrame(updatePitch);
     }

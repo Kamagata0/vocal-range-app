@@ -478,7 +478,8 @@
       rms += val * val;
     }
     rms = Math.sqrt(rms / SIZE);
-    if (rms < 0.015) return -1;
+    // ノイズゲート：息や微小環境音をカット
+    if (rms < 0.02) return -1;
 
     let r1 = 0;
     let r2 = SIZE - 1;
@@ -515,6 +516,10 @@
         maxpos = i;
       }
     }
+
+    // 周期的（音程感があるか）の厳密判定：息や摩擦音などの非周期ノイズをカット
+    if (c[0] <= 0 || (maxval / c[0]) < 0.78) return -1;
+
     let T0 = maxpos;
     const x1 = c[T0 - 1];
     const x2 = c[T0];
@@ -548,11 +553,13 @@
         if (!isListening) return;
         analyser.getFloatTimeDomainData(buffer);
         const freq = autoCorrelate(buffer, audioContext.sampleRate);
-        if (freq !== -1 && freq >= 60 && freq <= 1300) {
+        if (freq !== -1 && freq >= 65 && freq <= 1100) {
           const midi = frequencyToMidi(freq);
-          const noteName = midiToNote(midi);
-          const karaokeName = getKaraokeNoteName(midi);
-          onPitchDetected({ frequency: Math.round(freq), midi, noteName, karaokeName });
+          if (midi >= 36 && midi <= 84) {
+            const noteName = midiToNote(midi);
+            const karaokeName = getKaraokeNoteName(midi);
+            onPitchDetected({ frequency: Math.round(freq), midi, noteName, karaokeName });
+          }
         }
         rafId = requestAnimationFrame(updatePitch);
       }
@@ -1384,6 +1391,7 @@
         } else {
           detectedMinMidi = null;
           detectedMaxMidi = null;
+          let pitchBuffer = [];
           elements.micMinNote.textContent = '--';
           elements.micMaxNote.textContent = '--';
           elements.micDetectedNote.textContent = '...';
@@ -1394,13 +1402,34 @@
             (pitch) => {
               elements.micDetectedNote.textContent = pitch.karaokeName;
               elements.micKaraokeNote.textContent = `${pitch.noteName} ・ ${pitch.frequency} Hz`;
-              if (!detectedMinMidi || pitch.midi < detectedMinMidi) {
-                detectedMinMidi = pitch.midi;
-                elements.micMinNote.textContent = `${pitch.karaokeName} (${pitch.noteName})`;
-              }
-              if (!detectedMaxMidi || pitch.midi > detectedMaxMidi) {
-                detectedMaxMidi = pitch.midi;
-                elements.micMaxNote.textContent = `${pitch.karaokeName} (${pitch.noteName})`;
+
+              // 安定性バッファ（直近5フレームの音を保持）
+              pitchBuffer.push(pitch.midi);
+              if (pitchBuffer.length > 5) pitchBuffer.shift();
+
+              // 直近4回以上、同じ音程（±1半音のブレ以内）が維持された場合のみ「安定した歌声」として判定
+              if (pitchBuffer.length >= 4) {
+                const recent = pitchBuffer.slice(-4);
+                const avg = recent.reduce((a, b) => a + b, 0) / recent.length;
+                const isStable = recent.every(m => Math.abs(m - avg) <= 1.0);
+
+                if (isStable) {
+                  const stableMidi = Math.round(avg);
+                  elements.micStatusMsg.innerHTML = `<span class="text-emerald-400 font-bold">● 声を安定検知中！ (${pitch.karaokeName})</span>`;
+
+                  if (!detectedMinMidi || stableMidi < detectedMinMidi) {
+                    detectedMinMidi = stableMidi;
+                    const kNote = getKaraokeNoteName(stableMidi);
+                    const sNote = midiToNote(stableMidi);
+                    elements.micMinNote.textContent = `${kNote} (${sNote})`;
+                  }
+                  if (!detectedMaxMidi || stableMidi > detectedMaxMidi) {
+                    detectedMaxMidi = stableMidi;
+                    const kNote = getKaraokeNoteName(stableMidi);
+                    const sNote = midiToNote(stableMidi);
+                    elements.micMaxNote.textContent = `${kNote} (${sNote})`;
+                  }
+                }
               }
             },
             (errorMsg) => {
