@@ -804,6 +804,7 @@
       modalSongDifficulty: document.getElementById('modal-song-difficulty'),
       modalSongRecKey: document.getElementById('modal-song-rec-key'),
       modalSongReason: document.getElementById('modal-song-reason'),
+      modalSongHint: document.getElementById('modal-song-hint'),
       modalSongTags: document.getElementById('modal-song-tags'),
       modalSongFocus: document.getElementById('modal-song-focus'),
       btnModalRecordSong: document.getElementById('btn-modal-record-song'),
@@ -908,7 +909,13 @@
         notes.forEach(n => {
           const opt = document.createElement('option');
           opt.value = n.name;
-          opt.textContent = `${n.karaoke} (${n.name})`;
+          let hint = '';
+          if (n.name === 'A3') hint = ' ★低いラ（話し声）';
+          if (n.name === 'G4') hint = ' (一般的な男性地声最高音)';
+          if (n.name === 'A4') hint = ' ★高いラ（男性曲サビの高音・hiA）';
+          if (n.name === 'C4') hint = ' (中央のド・mid2C)';
+          if (n.name === 'C5') hint = ' (高いド・hiC)';
+          opt.textContent = `${n.karaoke} (${n.name})${hint}`;
           sel.appendChild(opt);
         });
       });
@@ -1128,6 +1135,59 @@
       elements.modalSongBadge.className = `inline-block text-[11px] font-bold px-2.5 py-1 rounded-full border mb-2 ${compat.badgeClass}`;
       elements.modalSongBadge.textContent = compat.title;
       elements.modalSongReason.textContent = compat.reason;
+
+      // 音域設定の混同（A3=mid2AとA4=hiA）に対する親切アシスト
+      if (elements.modalSongHint) {
+        if (userProfile.chest_high === 'A3') {
+          elements.modalSongHint.classList.remove('hidden');
+          elements.modalSongHint.innerHTML = `
+            <div class="flex items-start gap-2">
+              <i data-lucide="info" class="w-4 h-4 text-amber-400 shrink-0 mt-0.5"></i>
+              <div class="space-y-1">
+                <p class="font-bold text-amber-300">💡 地声最高音が「mid2A (A3・低いラ)」に設定されています</p>
+                <p class="text-[11px] text-amber-200/90 leading-relaxed">
+                  カラオケ音域では、男性曲のサビ等で使われる「高いラ」は<strong>【hiA】</strong>表記になります。<br>
+                  もし「この曲は歌えるはず！」という場合は、最高音を【mid2G】または【hiA】に変更すると原曲キー判定になります。
+                </p>
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <button type="button" id="btn-quick-fix-mid2g" class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white font-bold rounded-lg text-[10px] transition">
+                    最高音を「mid2G」に変更
+                  </button>
+                  <button type="button" id="btn-quick-fix-hia" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded-lg text-[10px] transition">
+                    最高音を「hiA」に変更
+                  </button>
+                </div>
+              </div>
+            </div>
+          `;
+          const btnFixMid2G = document.getElementById('btn-quick-fix-mid2g');
+          if (btnFixMid2G) {
+            btnFixMid2G.onclick = () => {
+              userProfile.chest_high = 'G4';
+              saveUserProfile(userProfile);
+              loadUserProfile();
+              renderSongList();
+              openSongModal(song.id);
+              showToast('地声最高音を mid2G (G4) に更新しました！');
+            };
+          }
+          const btnFixHiA = document.getElementById('btn-quick-fix-hia');
+          if (btnFixHiA) {
+            btnFixHiA.onclick = () => {
+              userProfile.chest_high = 'A4';
+              saveUserProfile(userProfile);
+              loadUserProfile();
+              renderSongList();
+              openSongModal(song.id);
+              showToast('地声最高音を hiA (A4) に更新しました！');
+            };
+          }
+          if (window.lucide) window.lucide.createIcons();
+        } else {
+          elements.modalSongHint.classList.add('hidden');
+          elements.modalSongHint.innerHTML = '';
+        }
+      }
 
       elements.modalSongTags.innerHTML = (song.practice_tags || []).map(tag => `
         <span class="text-[10px] bg-cyan-500/15 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-500/20"># ${tag}</span>

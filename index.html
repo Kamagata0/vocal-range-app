@@ -46,7 +46,7 @@
   <meta name="apple-mobile-web-app-title" content="VocalAI">
   <meta name="theme-color" content="#090d16">
 
-  <link rel="stylesheet" href="css/style.css?v=9">
+  <link rel="stylesheet" href="css/style.css?v=10">
 </head>
 
 <body class="bg-[#090d16] text-slate-100 min-h-screen selection:bg-purple-500/30">
@@ -407,6 +407,7 @@
                 </select>
               </div>
             </div>
+            <p class="text-[10px] text-purple-300/80">💡 豆知識: カラオケ音域では「高いラ(A4)」は【hiA】表記です。「mid2A(A3)」は低いラ（話し声付近）です。</p>
           </div>
 
           <!-- 裏声の音域 -->
@@ -667,6 +668,9 @@
             </div>
           </div>
         </div>
+
+        <!-- 音域設定に関する親切ヒント（mid2AとhiAの混同対策） -->
+        <div id="modal-song-hint" class="hidden p-3.5 rounded-2xl bg-amber-950/40 border border-amber-500/40 text-xs text-amber-200 space-y-1.5"></div>
 
         <!-- 相性判定の理由 -->
         <div class="p-3.5 bg-purple-950/20 border border-purple-500/20 rounded-2xl">
@@ -968,7 +972,7 @@
 
   </div>
 
-  <script src="js/app.js?v=9"></script>
+  <script src="js/app.js?v=10"></script>
 </body>
 
 </html>
