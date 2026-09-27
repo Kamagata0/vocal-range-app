@@ -1,0 +1,93 @@
+/* 音楽アプリ向けカスタムスタイル */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;700;900&display=swap');
+
+:root {
+  --color-primary: #8b5cf6;
+  --color-accent: #06b6d4;
+  --color-bg-dark: #090d16;
+  --color-surface-dark: #121826;
+  --color-card-dark: #182234;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--color-bg-dark);
+  color: #f1f5f9;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+/* スクロールバーの非表示（アプリ感演出） */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* グロー効果・グラスモーフィズム */
+.glass-panel {
+  background: rgba(24, 34, 52, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-nav {
+  background: rgba(9, 13, 22, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #a78bfa 0%, #38bdf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-gradient-music {
+  background: linear-gradient(135deg, #7c3aed 0%, #2563eb 50%, #06b6d4 100%);
+}
+
+.glow-card {
+  box-shadow: 0 8px 32px -4px rgba(124, 58, 237, 0.25);
+}
+
+/* 音域ビジュアライザーバー */
+.vocal-range-bar-container {
+  position: relative;
+  height: 14px;
+  background: #1e293b;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.vocal-range-bar-fill {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: 9999px;
+  transition: all 0.4s ease;
+}
+
+/* アニメーション */
+@keyframes pulseSlow {
+
+  0%,
+  100% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.03);
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulseSlow 3s infinite ease-in-out;
+}
