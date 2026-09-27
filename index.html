@@ -39,6 +39,13 @@
   <!-- Chart.js for Growth Graphs -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+  <!-- PWA & Mobile Web App Settings -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VocalAI">
+  <meta name="theme-color" content="#090d16">
+
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -63,11 +70,17 @@
           </h1>
         </div>
       </div>
-      <button id="btn-quick-profile"
-        class="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-xs px-3 py-1.5 rounded-full border border-slate-700/60 transition">
-        <i data-lucide="music" class="w-3.5 h-3.5 text-purple-400"></i>
-        <span id="header-user-range" class="font-medium text-purple-300">C3 - G4</span>
-      </button>
+      <div class="flex items-center gap-2">
+        <button id="btn-open-qr-modal" title="スマホで開く" class="flex items-center gap-1 bg-surface-card hover:bg-slate-700/80 text-xs px-2.5 py-1.5 rounded-full border border-surface-border text-slate-300 transition">
+          <i data-lucide="smartphone" class="w-3.5 h-3.5 text-cyan-400"></i>
+          <span class="text-[11px] font-semibold">スマホ</span>
+        </button>
+        <button id="btn-quick-profile"
+          class="flex items-center gap-1.5 bg-slate-800/80 hover:bg-slate-700/80 text-xs px-3 py-1.5 rounded-full border border-slate-700/60 transition">
+          <i data-lucide="music" class="w-3.5 h-3.5 text-purple-400"></i>
+          <span id="header-user-range" class="font-medium text-purple-300">mid1C - mid2G</span>
+        </button>
+      </div>
     </header>
 
     <!-- メインコンテンツ領域（画面切り替え） -->
@@ -767,6 +780,41 @@
             記録を保存する（AIアドバイス自動生成）
           </button>
         </form>
+      </div>
+    </div>
+
+    <!-- ================= スマホで開く（QRコード）モーダル ================= -->
+    <div id="modal-qr" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
+      <div class="glass-panel w-full max-w-sm rounded-3xl p-6 border border-slate-700/80 space-y-4 text-center">
+        <div class="flex items-center justify-between border-b border-surface-border pb-3 text-left">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2">
+            <i data-lucide="smartphone" class="w-4 h-4 text-cyan-400"></i>
+            スマホで開く
+          </h3>
+          <button id="btn-close-qr-modal" class="text-slate-400 hover:text-white p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <div class="p-4 bg-white rounded-2xl inline-block mx-auto shadow-xl">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=https://kamagata0.github.io/vocal-range-app/" alt="VocalAI QRコード" class="w-44 h-44 mx-auto">
+        </div>
+
+        <p class="text-xs text-slate-300 font-medium leading-relaxed">
+          スマホの標準カメラで上のQRコードを読み取ると、アプリがブラウザで開きます。
+        </p>
+
+        <div class="p-3 bg-purple-950/20 border border-purple-500/20 rounded-xl text-left text-[11px] text-slate-400 space-y-1">
+          <span class="font-bold text-purple-300 block">💡 アプリとして保存する方法</span>
+          <p>ブラウザで開いた後、メニューの「<strong>ホーム画面に追加</strong>」を選ぶと、本物のスマホアプリのように全画面で起動できます！</p>
+        </div>
+
+        <div class="pt-1">
+          <button id="btn-copy-live-url" class="w-full py-2.5 bg-surface-card hover:bg-slate-800 text-xs font-bold text-slate-200 rounded-xl border border-surface-border transition flex items-center justify-center gap-1.5">
+            <i data-lucide="copy" class="w-3.5 h-3.5 text-purple-400"></i>
+            <span>URLをコピーする</span>
+          </button>
+        </div>
       </div>
     </div>
 

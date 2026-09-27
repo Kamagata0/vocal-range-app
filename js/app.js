@@ -722,6 +722,10 @@
       logInputMemo: document.getElementById('log-input-memo'),
 
       // 楽曲詳細モーダル
+      btnOpenQrModal: document.getElementById('btn-open-qr-modal'),
+      modalQr: document.getElementById('modal-qr'),
+      btnCloseQrModal: document.getElementById('btn-close-qr-modal'),
+      btnCopyLiveUrl: document.getElementById('btn-copy-live-url'),
       modalSongDetail: document.getElementById('modal-song-detail'),
       btnCloseSongModal: document.getElementById('btn-close-song-modal'),
       btnModalFilterArtist: document.getElementById('btn-modal-filter-artist'),
@@ -1410,6 +1414,31 @@
       elements.btnCloseLogModal.addEventListener('click', () => {
         elements.modalPracticeLog.classList.add('hidden');
         elements.modalPracticeLog.classList.remove('flex');
+      });
+    }
+
+    if (elements.btnOpenQrModal && elements.modalQr) {
+      elements.btnOpenQrModal.addEventListener('click', () => {
+        elements.modalQr.classList.remove('hidden');
+        elements.modalQr.classList.add('flex');
+      });
+    }
+
+    if (elements.btnCloseQrModal && elements.modalQr) {
+      elements.btnCloseQrModal.addEventListener('click', () => {
+        elements.modalQr.classList.add('hidden');
+        elements.modalQr.classList.remove('flex');
+      });
+    }
+
+    if (elements.btnCopyLiveUrl) {
+      elements.btnCopyLiveUrl.addEventListener('click', () => {
+        const liveUrl = 'https://kamagata0.github.io/vocal-range-app/';
+        navigator.clipboard.writeText(liveUrl).then(() => {
+          showToast('公開URLをコピーしました！');
+        }).catch(() => {
+          showToast(liveUrl);
+        });
       });
     }
 
