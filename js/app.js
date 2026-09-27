@@ -641,6 +641,7 @@
   let currentFilter = 'all';
   let selectedArtist = '';
   let isMicRunning = false;
+  let currentMicMode = 'chest'; // 'chest' または 'falsetto'
   let detectedMinMidi = null;
   let detectedMaxMidi = null;
   let growthChartInstance = null;
@@ -698,11 +699,15 @@
       manualSongTags: document.getElementById('manual-song-tags'),
 
       // 音域・マイク
+      btnMicModeChest: document.getElementById('btn-mic-mode-chest'),
+      btnMicModeFalsetto: document.getElementById('btn-mic-mode-falsetto'),
       btnToggleMic: document.getElementById('btn-toggle-mic'),
       micDetectedNote: document.getElementById('mic-detected-note'),
       micKaraokeNote: document.getElementById('mic-karaoke-note'),
       micMinNote: document.getElementById('mic-min-note'),
       micMaxNote: document.getElementById('mic-max-note'),
+      micMinLabel: document.getElementById('mic-min-label'),
+      micMaxLabel: document.getElementById('mic-max-label'),
       micStatusMsg: document.getElementById('mic-status-msg'),
       rangeProfileForm: document.getElementById('range-profile-form'),
       inputName: document.getElementById('input-name'),
@@ -1369,23 +1374,89 @@
       });
     }
 
+    // マイク測定モード切り替え（地声 vs 裏声）
+    function switchMicMode(mode) {
+      if (currentMicMode === mode) return;
+      if (isMicRunning) {
+        stopPitchDetection();
+        isMicRunning = false;
+        elements.btnToggleMic.innerHTML = `<i data-lucide="mic" class="w-4 h-4"></i><span>マイク測定を開始する</span>`;
+        elements.btnToggleMic.classList.remove('bg-rose-600');
+        elements.btnToggleMic.classList.add('bg-gradient-music');
+      }
+      currentMicMode = mode;
+      detectedMinMidi = null;
+      detectedMaxMidi = null;
+      if (elements.micMinNote) elements.micMinNote.textContent = '--';
+      if (elements.micMaxNote) elements.micMaxNote.textContent = '--';
+      if (elements.micDetectedNote) elements.micDetectedNote.textContent = '--';
+      if (elements.micKaraokeNote) elements.micKaraokeNote.textContent = 'マイクを開始して声を出してください';
+
+      if (mode === 'chest') {
+        if (elements.btnMicModeChest) {
+          elements.btnMicModeChest.className = 'py-2 text-xs font-bold rounded-xl transition bg-purple-600 text-white flex items-center justify-center gap-1.5 shadow-md';
+        }
+        if (elements.btnMicModeFalsetto) {
+          elements.btnMicModeFalsetto.className = 'py-2 text-xs font-semibold rounded-xl transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5';
+        }
+        if (elements.micMinLabel) elements.micMinLabel.textContent = '地声の最低音';
+        if (elements.micMaxLabel) {
+          elements.micMaxLabel.textContent = '地声の最高音';
+          if (elements.micMaxNote) elements.micMaxNote.className = 'font-bold text-purple-400 text-sm mt-0.5';
+        }
+        if (elements.micStatusMsg) elements.micStatusMsg.textContent = '※地声（普段の話し声の延長）で、無理のない「一番低い声」と「一番高い声」を「あー」と出してください';
+      } else {
+        if (elements.btnMicModeChest) {
+          elements.btnMicModeChest.className = 'py-2 text-xs font-semibold rounded-xl transition text-slate-400 hover:text-white flex items-center justify-center gap-1.5';
+        }
+        if (elements.btnMicModeFalsetto) {
+          elements.btnMicModeFalsetto.className = 'py-2 text-xs font-bold rounded-xl transition bg-cyan-600 text-white flex items-center justify-center gap-1.5 shadow-md';
+        }
+        if (elements.micMinLabel) elements.micMinLabel.textContent = '裏声の最低音';
+        if (elements.micMaxLabel) {
+          elements.micMaxLabel.textContent = '裏声の最高音';
+          if (elements.micMaxNote) elements.micMaxNote.className = 'font-bold text-cyan-400 text-sm mt-0.5';
+        }
+        if (elements.micStatusMsg) elements.micStatusMsg.textContent = '※裏声（ファルセット）で、綺麗に出せる一番高い声などを「あー」と出してください';
+      }
+      if (window.lucide) window.lucide.createIcons();
+    }
+
+    if (elements.btnMicModeChest) {
+      elements.btnMicModeChest.addEventListener('click', () => switchMicMode('chest'));
+    }
+    if (elements.btnMicModeFalsetto) {
+      elements.btnMicModeFalsetto.addEventListener('click', () => switchMicMode('falsetto'));
+    }
+
     if (elements.btnToggleMic) {
       elements.btnToggleMic.addEventListener('click', async () => {
+        const isChest = (currentMicMode === 'chest');
+        const modeLabel = isChest ? '地声' : '裏声';
+
         if (isMicRunning) {
           stopPitchDetection();
           isMicRunning = false;
           elements.btnToggleMic.innerHTML = `<i data-lucide="mic" class="w-4 h-4"></i><span>マイク測定を開始する</span>`;
           elements.btnToggleMic.classList.remove('bg-rose-600');
           elements.btnToggleMic.classList.add('bg-gradient-music');
-          elements.micStatusMsg.textContent = '※測定を停止しました。';
+          elements.micStatusMsg.textContent = `※${modeLabel}の測定を停止しました。`;
 
           if (detectedMinMidi && detectedMaxMidi) {
             const minNote = midiToNote(detectedMinMidi);
             const maxNote = midiToNote(detectedMaxMidi);
-            if (confirm(`測定完了！\n最低音: ${formatFullNote(minNote)}\n最高音: ${formatFullNote(maxNote)}\nこれを地声音域として反映しますか？`)) {
-              elements.selectChestLow.value = minNote;
-              elements.selectChestHigh.value = maxNote;
+            const confirmMsg = `【${modeLabel}の測定完了！】\n最低音: ${formatFullNote(minNote)}\n最高音: ${formatFullNote(maxNote)}\n\nこれを「${modeLabel}の音域」としてプロフィールに保存しますか？`;
+
+            if (confirm(confirmMsg)) {
+              if (isChest) {
+                elements.selectChestLow.value = minNote;
+                elements.selectChestHigh.value = maxNote;
+              } else {
+                elements.selectFalsettoLow.value = minNote;
+                elements.selectFalsettoHigh.value = maxNote;
+              }
               elements.rangeProfileForm.dispatchEvent(new Event('submit'));
+              showToast(`${modeLabel}の音域を保存しました！`);
             }
           }
         } else {
@@ -1396,7 +1467,9 @@
           elements.micMaxNote.textContent = '--';
           elements.micDetectedNote.textContent = '...';
           elements.micKaraokeNote.textContent = '声を出してください';
-          elements.micStatusMsg.textContent = '音声解析中... 「あー」と長く声を出してください';
+          elements.micStatusMsg.textContent = isChest
+            ? '地声音声解析中... 「あー」と低音から高音まで声を出してください'
+            : '裏声音声解析中... 「あー」ときれいに出せる裏声を出してください';
 
           const success = await startPitchDetection(
             (pitch) => {
@@ -1415,7 +1488,7 @@
 
                 if (isStable) {
                   const stableMidi = Math.round(avg);
-                  elements.micStatusMsg.innerHTML = `<span class="text-emerald-400 font-bold">● 声を安定検知中！ (${pitch.karaokeName})</span>`;
+                  elements.micStatusMsg.innerHTML = `<span class="text-emerald-400 font-bold">● ${modeLabel}を安定検知中！ (${pitch.karaokeName})</span>`;
 
                   if (!detectedMinMidi || stableMidi < detectedMinMidi) {
                     detectedMinMidi = stableMidi;
@@ -1437,12 +1510,14 @@
               stopPitchDetection();
               isMicRunning = false;
               elements.btnToggleMic.innerHTML = `<i data-lucide="mic" class="w-4 h-4"></i><span>マイク測定を開始する</span>`;
+              elements.btnToggleMic.classList.remove('bg-rose-600');
+              elements.btnToggleMic.classList.add('bg-gradient-music');
             }
           );
 
           if (success) {
             isMicRunning = true;
-            elements.btnToggleMic.innerHTML = `<i data-lucide="square" class="w-4 h-4"></i><span>測定を終了して保存</span>`;
+            elements.btnToggleMic.innerHTML = `<i data-lucide="square" class="w-4 h-4"></i><span>${modeLabel}測定を終了して保存</span>`;
             elements.btnToggleMic.classList.remove('bg-gradient-music');
             elements.btnToggleMic.classList.add('bg-rose-600');
           }
