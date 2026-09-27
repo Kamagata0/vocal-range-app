@@ -4,18 +4,19 @@ const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 
 
 // カラオケ音域通称（日本のカラオケ愛好家に馴染み深い表記：mid1A, mid2G, hiA, hihiA など）
 export function getKaraokeNoteName(midiNote) {
-  if (!midiNote || midiNote < 36 || midiNote > 96) return '';
-  const noteIndex = midiNote % 12;
-  const octave = Math.floor(midiNote / 12) - 1;
+  if (!midiNote || midiNote < 24 || midiNote > 96) return '';
+  const noteIndex = ((midiNote % 12) + 12) % 12;
   const noteName = NOTE_NAMES[noteIndex];
-
-  if (octave === 1) return `lowlow${noteName}`;
-  if (octave === 2) return `low${noteName}`;
-  if (octave === 3) return `mid1${noteName}`;
-  if (octave === 4) return `mid2${noteName}`;
-  if (octave === 5) return `hi${noteName}`;
-  if (octave === 6) return `hihi${noteName}`;
-  return `${noteName}${octave}`;
+  // 日本のカラオケ音域体系は「A（ラ）」でオクターブ接頭辞が切り替わる（A4=hiA, A#4=hiA#, B4=hiB, A3=mid2A, A2=mid1A）
+  const kOctave = Math.floor((midiNote - 9) / 12);
+  if (kOctave === 1) return `lowlow${noteName}`;
+  if (kOctave === 2) return `low${noteName}`;
+  if (kOctave === 3) return `mid1${noteName}`;
+  if (kOctave === 4) return `mid2${noteName}`;
+  if (kOctave === 5) return `hi${noteName}`;
+  if (kOctave === 6) return `hihi${noteName}`;
+  if (kOctave >= 7) return `hihihi${noteName}`;
+  return `${noteName}`;
 }
 
 // "C4" -> 60
