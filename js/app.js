@@ -125,7 +125,19 @@
     { id: "cl16", title: "ただ君に晴れ", artist: "ヨルシカ", lowest_note: "A3", highest_note: "D5", main_range: "C4〜C5", difficulty: 3, vocal_type: "female", is_estimate: false, practice_tags: ["透明感", "跳ねるリズム", "息遣い"], practice_focus: "涼しげなウィスパートーンと正確なピッチ移動。" },
     { id: "cl17", title: "秒針を噛む", artist: "ずっと真夜中でいいのに。", lowest_note: "G#3", highest_note: "E5", main_range: "B3〜D#5", difficulty: 4, vocal_type: "female", is_estimate: false, practice_tags: ["早口", "裏声", "グルーヴ"], practice_focus: "高難度のリズムとオクターブ跳躍。" },
     { id: "cl18", title: "廻廻奇譚", artist: "Eve", lowest_note: "C#3", highest_note: "A#4", main_range: "F3〜G#4", difficulty: 4, vocal_type: "male", is_estimate: false, practice_tags: ["ダーク", "ハイトーン", "高速"], practice_focus: "低音の呟きからサビのハイテンションな叫びへ。" },
-    { id: "cl19", title: "ダーリン", artist: "須田景凪", lowest_note: "C#3", highest_note: "C5", main_range: "F3〜A#4", difficulty: 4, vocal_type: "male", is_estimate: true, practice_tags: ["高音", "地声→裏声の切り替え", "リズム"], practice_focus: "リズミカルな譜割りと急激なオクターブ跳躍。" }
+    { id: "cl19", title: "ダーリン", artist: "須田景凪", lowest_note: "C#3", highest_note: "C5", main_range: "F3〜A#4", difficulty: 4, vocal_type: "male", is_estimate: true, practice_tags: ["高音", "地声→裏声の切り替え", "リズム"], practice_focus: "リズミカルな譜割りと急激なオクターブ跳躍。" },
+
+    // --- カラオケ定番ヒット曲（拡充） ---
+    { id: "ex1", title: "猫", artist: "DISH//", lowest_note: "B2", highest_note: "A4", main_range: "E3〜G4", difficulty: 3, vocal_type: "male", is_estimate: false, practice_tags: ["バラード", "高音", "感情表現"], practice_focus: "あいみょん提供曲。サビの最高音hiAロングトーンと繊細なAメロの抑揚表現。" },
+    { id: "ex2", title: "さよーならまたいつか!", artist: "米津玄師", lowest_note: "C3", highest_note: "G#4", main_range: "D#3〜F#4", difficulty: 3, vocal_type: "male", is_estimate: false, practice_tags: ["軽快なリズム", "高音", "ポップス"], practice_focus: "NHK朝ドラ主題歌。軽快なステップとサビのmid2G#の気持ちよい抜け感。" },
+    { id: "ex3", title: "まちがいさがし", artist: "菅田将暉", lowest_note: "B2", highest_note: "A4", main_range: "E3〜G#4", difficulty: 3, vocal_type: "male", is_estimate: false, practice_tags: ["バラード", "ロングトーン", "高音"], practice_focus: "米津玄師作詞作曲。力強いサビのhiAロングトーンと胸を打つエモーショナルな息遣い。" },
+    { id: "ex4", title: "Flavor Of Life", artist: "宇多田ヒカル", lowest_note: "G3", highest_note: "D#5", main_range: "A#3〜C#5", difficulty: 3, vocal_type: "female", is_estimate: false, practice_tags: ["切なさ", "フェイク", "中高音"], practice_focus: "サビの切ないハイトーンと息混じりの歌声。ドラマ『花より男子2』主題歌。" },
+    { id: "ex5", title: "ノーダウト", artist: "Official髭男dism", lowest_note: "C#3", highest_note: "C#5", main_range: "F#3〜B4", difficulty: 4, vocal_type: "male", is_estimate: false, practice_tags: ["ファンク", "高音", "グルーヴ"], practice_focus: "キレのあるビート感とサビの突き抜けるハイトーンhiC#。" },
+    { id: "ex6", title: "花束", artist: "back number", lowest_note: "A2", highest_note: "F#4", main_range: "C#3〜E4", difficulty: 2, vocal_type: "male", is_estimate: false, practice_tags: ["語り", "中低音", "安定感"], practice_focus: "最高音mid2F#と歌いやすく、素朴な語り口調を磨くのに最適な名バラード。" },
+    { id: "ex7", title: "いつか", artist: "Saucy Dog", lowest_note: "C#3", highest_note: "A4", main_range: "E3〜G#4", difficulty: 3, vocal_type: "male", is_estimate: false, practice_tags: ["エモーショナル", "高音", "バラード"], practice_focus: "サビのhiAの叫び。胸を打つストレートなハイトーンと感情の解放。" },
+    { id: "ex8", title: "花占い", artist: "Vaundy", lowest_note: "C3", highest_note: "A4", main_range: "F3〜G4", difficulty: 3, vocal_type: "male", is_estimate: false, practice_tags: ["軽快なポップス", "リズム", "高音"], practice_focus: "四つ打ちに乗せた軽やかなボーカルワークとサビのhiAアクセント。" },
+    { id: "ex9", title: "インフェルノ", artist: "Mrs. GREEN APPLE", lowest_note: "D3", highest_note: "B4", main_range: "G3〜A#4", difficulty: 5, vocal_type: "male", is_estimate: false, practice_tags: ["超高音", "ロック", "シャウト"], practice_focus: "サビのhiB連打。圧倒的なエネルギーとハイトーンロック発声。" },
+    { id: "ex10", title: "CITRUS", artist: "Da-iCE", lowest_note: "C#3", highest_note: "D5", main_range: "G#3〜C5", difficulty: 5, vocal_type: "male", is_estimate: false, practice_tags: ["超高音", "ミックスボイス練習", "エモーショナル"], practice_focus: "サビのhiDに達する男性最高峰のハイトーン。レコ大受賞の感動的バラード。" }
   ];
 
   // ================= 2. 音名・音域ユーティリティ =================
@@ -314,8 +326,51 @@
   const STORAGE_KEYS = {
     USER_PROFILE: 'vocal_range_user_profile',
     PRACTICE_LOGS: 'vocal_range_practice_logs',
-    CUSTOM_SONGS: 'vocal_range_custom_songs'
+    CUSTOM_SONGS: 'vocal_range_custom_songs',
+    FAVORITES: 'vocal_range_favorites'
   };
+
+  function getFavorites() {
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.FAVORITES);
+      return data ? JSON.parse(data) : {};
+    } catch (e) {
+      return {};
+    }
+  }
+
+  function saveFavorites(favs) {
+    try {
+      localStorage.setItem(STORAGE_KEYS.FAVORITES, JSON.stringify(favs));
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function toggleFavorite(songId, defaultKey = '±0') {
+    const favs = getFavorites();
+    if (favs[songId]) {
+      delete favs[songId];
+      saveFavorites(favs);
+      return false;
+    } else {
+      favs[songId] = { isFavorite: true, myKey: defaultKey, addedAt: new Date().toISOString() };
+      saveFavorites(favs);
+      return true;
+    }
+  }
+
+  function setSongMyKey(songId, myKey) {
+    const favs = getFavorites();
+    if (!favs[songId]) {
+      favs[songId] = { isFavorite: true, myKey: myKey, addedAt: new Date().toISOString() };
+    } else {
+      favs[songId].myKey = myKey;
+    }
+    saveFavorites(favs);
+    return favs[songId];
+  }
 
   const DEFAULT_PROFILE = {
     id: 'guest-user',
@@ -774,8 +829,15 @@
       inputWeakness: document.getElementById('input-weakness'),
       inputGoal: document.getElementById('input-goal'),
 
-      // 練習記録
+      // ホーム十八番
+      homeFavBanner: document.getElementById('home-fav-banner'),
+      homeFavCountBadge: document.getElementById('home-fav-count-badge'),
+
+      // 練習記録 & 採点
       practiceLogsContainer: document.getElementById('practice-logs-container'),
+      practiceStatCount: document.getElementById('practice-stat-count'),
+      practiceStatBestScore: document.getElementById('practice-stat-best-score'),
+      practiceStatFavCount: document.getElementById('practice-stat-fav-count'),
       btnOpenLogModal: document.getElementById('btn-open-log-modal'),
       btnCloseLogModal: document.getElementById('btn-close-log-modal'),
       modalPracticeLog: document.getElementById('modal-practice-log'),
@@ -783,6 +845,8 @@
       logInputSong: document.getElementById('log-input-song'),
       logInputDate: document.getElementById('log-input-date'),
       logInputDuration: document.getElementById('log-input-duration'),
+      logInputScore: document.getElementById('log-input-score'),
+      logInputKey: document.getElementById('log-input-key'),
       logSelectLow: document.getElementById('log-select-low'),
       logSelectHigh: document.getElementById('log-select-high'),
       logInputHard: document.getElementById('log-input-hard'),
@@ -808,6 +872,10 @@
       modalSongTags: document.getElementById('modal-song-tags'),
       modalSongFocus: document.getElementById('modal-song-focus'),
       btnModalRecordSong: document.getElementById('btn-modal-record-song'),
+      btnModalToggleFav: document.getElementById('btn-modal-toggle-fav'),
+      modalFavBtnText: document.getElementById('modal-fav-btn-text'),
+      modalSelectMyKey: document.getElementById('modal-select-my-key'),
+      btnModalSaveMyKey: document.getElementById('btn-modal-save-my-key'),
 
       // キー変更シミュレーター
       keyShiftButtons: document.querySelectorAll('.btn-key-shift'),
@@ -982,6 +1050,8 @@
 
       if (elements.logSelectLow) elements.logSelectLow.value = profile.chest_low || 'C3';
       if (elements.logSelectHigh) elements.logSelectHigh.value = profile.chest_high || 'G4';
+
+      renderPracticeSummaryStats();
     }
 
     function createSongCardHtml(song, userProfile) {
@@ -989,6 +1059,15 @@
       const diffStars = '★'.repeat(song.difficulty) + '☆'.repeat(5 - song.difficulty);
       const estimateBadge = song.is_estimate ? `<span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700">参考値</span>` : '';
       const customBadge = song.is_custom ? `<span class="text-[9px] bg-purple-900/60 text-purple-300 font-bold px-1.5 py-0.5 rounded border border-purple-500/40">マイ登録</span>` : '';
+
+      const favorites = getFavorites();
+      const favData = favorites[song.id];
+      const isFav = !!favData;
+      const favKeyBadge = isFav && favData.myKey
+        ? `<span class="text-[9px] bg-amber-500/20 text-amber-300 font-black px-1.5 py-0.5 rounded-md border border-amber-500/30 flex items-center gap-0.5">
+             <i data-lucide="star" class="w-2.5 h-2.5 fill-amber-400 text-amber-400"></i> ${favData.myKey}
+           </span>`
+        : '';
 
       const highestK = formatKaraokeNote(song.highest_note);
       const lowestK = formatKaraokeNote(song.lowest_note);
@@ -1001,15 +1080,19 @@
                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${compat.badgeClass}">
                   ${compat.title}
                 </span>
+                ${favKeyBadge}
                 ${customBadge}
                 ${estimateBadge}
               </div>
               <h4 class="text-sm font-bold text-white leading-tight">${song.title}</h4>
               <p class="text-xs text-slate-400 font-medium">${song.artist}</p>
             </div>
-            <div class="text-right shrink-0">
+            <div class="flex flex-col items-end gap-1.5 shrink-0">
+              <button type="button" class="btn-card-toggle-fav p-1 rounded-lg transition hover:scale-110 active:scale-95 ${isFav ? 'text-amber-400' : 'text-slate-500 hover:text-amber-300'}" data-id="${song.id}" title="${isFav ? '十八番リストから削除' : '十八番リストに追加'}">
+                <i data-lucide="star" class="w-4 h-4 ${isFav ? 'fill-amber-400 text-amber-400' : ''}"></i>
+              </button>
               <span class="text-xs text-amber-400 font-semibold">${diffStars}</span>
-              <p class="text-[10px] text-slate-400 mt-0.5">最高: <span class="font-bold text-slate-100 text-xs">${highestK}</span> <span class="text-[9px] text-slate-500">(${song.highest_note})</span></p>
+              <p class="text-[10px] text-slate-400">最高: <span class="font-bold text-slate-100 text-xs">${highestK}</span> <span class="text-[9px] text-slate-500">(${song.highest_note})</span></p>
             </div>
           </div>
           <div class="flex items-center justify-between text-[11px] pt-2 border-t border-white/5 text-slate-400">
@@ -1026,6 +1109,7 @@
       const userProfile = getUserProfile();
       const allSongs = getAllSongs();
       const query = elements.songSearchInput ? elements.songSearchInput.value.toLowerCase().trim() : '';
+      const favorites = getFavorites();
 
       let songs = allSongs.filter(song => {
         if (selectedArtist && song.artist !== selectedArtist) return false;
@@ -1045,6 +1129,7 @@
         }
 
         if (currentFilter === 'all') return true;
+        if (currentFilter === 'favorite') return !!favorites[song.id];
         if (currentFilter === 'custom') return song.is_custom === true;
         const compat = calculateCompatibility(userProfile, song);
         if (currentFilter === 'fit') return compat.title === '歌いやすそう';
@@ -1056,30 +1141,44 @@
       if (!elements.songListContainer) return;
 
       if (songs.length === 0) {
-        // 曲が見つからない場合、AIで推定追加するサジェストを表示
-        const searchPrompt = query ? `「${query}」` : '';
-        elements.songListContainer.innerHTML = `
-          <div class="glass-panel p-6 rounded-3xl text-center border border-purple-500/30 bg-purple-950/20 space-y-3">
-            <div class="w-10 h-10 rounded-full bg-purple-600/20 flex items-center justify-center mx-auto text-purple-400">
-              <i data-lucide="sparkles" class="w-5 h-5"></i>
+        if (currentFilter === 'favorite') {
+          elements.songListContainer.innerHTML = `
+            <div class="glass-panel p-6 rounded-3xl text-center border border-amber-500/30 bg-amber-950/20 space-y-3">
+              <div class="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center mx-auto text-amber-400">
+                <i data-lucide="star" class="w-5 h-5 fill-amber-400"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-white">十八番リストがまだ空です</h4>
+                <p class="text-xs text-slate-400 mt-1">曲カードの星アイコン（★）をタップすると、あなたのお気に入り曲とマイキー設定をここに保存できます！</p>
+              </div>
             </div>
-            <div>
-              <h4 class="text-sm font-bold text-white">${searchPrompt}が見つかりませんでした</h4>
-              <p class="text-xs text-slate-400 mt-1">AIに音域を推定させてマイライブラリに追加できます！</p>
+          `;
+        } else {
+          // 曲が見つからない場合、AIで推定追加するサジェストを表示
+          const searchPrompt = query ? `「${query}」` : '';
+          elements.songListContainer.innerHTML = `
+            <div class="glass-panel p-6 rounded-3xl text-center border border-purple-500/30 bg-purple-950/20 space-y-3">
+              <div class="w-10 h-10 rounded-full bg-purple-600/20 flex items-center justify-center mx-auto text-purple-400">
+                <i data-lucide="sparkles" class="w-5 h-5"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-white">${searchPrompt}が見つかりませんでした</h4>
+                <p class="text-xs text-slate-400 mt-1">AIに音域を推定させてマイライブラリに追加できます！</p>
+              </div>
+              <button id="btn-quick-ai-add-from-search" class="px-4 py-2.5 bg-gradient-music text-white text-xs font-bold rounded-2xl shadow-lg shadow-purple-600/30 hover:brightness-110 active:scale-95 transition flex items-center justify-center gap-1.5 mx-auto">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>AIでこの曲の音域を追加する</span>
+              </button>
             </div>
-            <button id="btn-quick-ai-add-from-search" class="px-4 py-2.5 bg-gradient-music text-white text-xs font-bold rounded-2xl shadow-lg shadow-purple-600/30 hover:brightness-110 active:scale-95 transition flex items-center justify-center gap-1.5 mx-auto">
-              <i data-lucide="plus" class="w-4 h-4"></i>
-              <span>AIでこの曲の音域を追加する</span>
-            </button>
-          </div>
-        `;
-        const quickAddBtn = document.getElementById('btn-quick-ai-add-from-search');
-        if (quickAddBtn) {
-          quickAddBtn.onclick = () => {
-            elements.modalAddSong.classList.remove('hidden');
-            elements.modalAddSong.classList.add('flex');
-            elements.aiSongTitle.value = query;
-          };
+          `;
+          const quickAddBtn = document.getElementById('btn-quick-ai-add-from-search');
+          if (quickAddBtn) {
+            quickAddBtn.onclick = () => {
+              elements.modalAddSong.classList.remove('hidden');
+              elements.modalAddSong.classList.add('flex');
+              elements.aiSongTitle.value = query;
+            };
+          }
         }
       } else {
         elements.songListContainer.innerHTML = songs.map(s => createSongCardHtml(s, userProfile)).join('');
@@ -1189,6 +1288,55 @@
         }
       }
 
+      // 十八番（お気に入り）＆ マイキー設定の反映
+      function updateModalFavUI() {
+        const favs = getFavorites();
+        const currentFav = favs[song.id];
+        const isFav = !!currentFav;
+
+        if (elements.btnModalToggleFav) {
+          if (isFav) {
+            elements.btnModalToggleFav.className = 'px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm bg-amber-500/20 text-amber-300 border-amber-500/40 hover:bg-amber-500/30';
+            elements.btnModalToggleFav.innerHTML = `<i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400"></i><span id="modal-fav-btn-text">登録済み (解除)</span>`;
+          } else {
+            elements.btnModalToggleFav.className = 'px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm bg-surface-card text-slate-300 border-surface-border hover:text-white hover:border-amber-400';
+            elements.btnModalToggleFav.innerHTML = `<i data-lucide="star" class="w-3.5 h-3.5"></i><span id="modal-fav-btn-text">リストに追加</span>`;
+          }
+        }
+
+        if (elements.modalSelectMyKey) {
+          const recKey = compat.isOctaveDown
+            ? (compat.recommendedKey === 0 ? 'オク下' : `オク下+${compat.recommendedKey}`)
+            : (compat.recommendedKey === 0 ? '±0' : (compat.recommendedKey > 0 ? `+${compat.recommendedKey}` : `${compat.recommendedKey}`));
+          elements.modalSelectMyKey.value = currentFav?.myKey || recKey;
+        }
+        if (window.lucide) window.lucide.createIcons();
+      }
+      updateModalFavUI();
+
+      if (elements.btnModalToggleFav) {
+        elements.btnModalToggleFav.onclick = () => {
+          const chosenKey = elements.modalSelectMyKey ? elements.modalSelectMyKey.value : '±0';
+          const isNow = toggleFavorite(song.id, chosenKey);
+          showToast(isNow ? '十八番・歌う曲リストに追加しました！★' : 'リストから解除しました');
+          updateModalFavUI();
+          renderSongList();
+          renderHomeRecommendations();
+          renderPracticeSummaryStats();
+        };
+      }
+
+      if (elements.btnModalSaveMyKey) {
+        elements.btnModalSaveMyKey.onclick = () => {
+          const chosenKey = elements.modalSelectMyKey ? elements.modalSelectMyKey.value : '±0';
+          setSongMyKey(song.id, chosenKey);
+          showToast(`「${song.title}」のマイキーを【${chosenKey}】で保存しました！`);
+          updateModalFavUI();
+          renderSongList();
+          renderHomeRecommendations();
+        };
+      }
+
       elements.modalSongTags.innerHTML = (song.practice_tags || []).map(tag => `
         <span class="text-[10px] bg-cyan-500/15 text-cyan-300 px-2 py-0.5 rounded-full border border-cyan-500/20"># ${tag}</span>
       `).join('');
@@ -1228,6 +1376,18 @@
           openSongModal(card.dataset.id);
         };
       });
+
+      document.querySelectorAll('.btn-card-toggle-fav').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const songId = btn.dataset.id;
+          const isNowFav = toggleFavorite(songId);
+          showToast(isNowFav ? '十八番・歌う曲リストに追加しました！★' : 'リストから解除しました');
+          renderSongList();
+          renderHomeRecommendations();
+          renderPracticeSummaryStats();
+        };
+      });
     }
 
     function openPracticeLogModal(presetSongTitle = '') {
@@ -1236,10 +1396,48 @@
       elements.modalPracticeLog.classList.add('flex');
       if (presetSongTitle && elements.logInputSong) {
         elements.logInputSong.value = presetSongTitle;
+        const allSongs = getAllSongs();
+        const found = allSongs.find(s => s.title === presetSongTitle);
+        if (found) {
+          const favs = getFavorites();
+          if (favs[found.id] && favs[found.id].myKey && elements.logInputKey) {
+            elements.logInputKey.value = favs[found.id].myKey;
+          }
+        }
+      }
+      if (elements.logInputScore) elements.logInputScore.value = '';
+    }
+
+    function renderPracticeSummaryStats() {
+      const logs = getPracticeLogs();
+      const favs = getFavorites();
+      const favCount = Object.keys(favs).length;
+
+      if (elements.practiceStatCount) {
+        elements.practiceStatCount.textContent = `${logs.length}回`;
+      }
+
+      if (elements.practiceStatFavCount) {
+        elements.practiceStatFavCount.textContent = `${favCount}曲`;
+      }
+
+      if (elements.practiceStatBestScore) {
+        const scores = logs.map(l => parseFloat(l.score)).filter(s => !isNaN(s));
+        if (scores.length > 0) {
+          const maxScore = Math.max(...scores);
+          elements.practiceStatBestScore.textContent = `${maxScore}点`;
+        } else {
+          elements.practiceStatBestScore.textContent = '--';
+        }
+      }
+
+      if (elements.homeFavCountBadge) {
+        elements.homeFavCountBadge.textContent = `${favCount}曲`;
       }
     }
 
     function renderPracticeLogs() {
+      renderPracticeSummaryStats();
       if (!elements.practiceLogsContainer) return;
       const logs = getPracticeLogs();
       if (logs.length === 0) {
@@ -1255,12 +1453,25 @@
             <div class="flex items-start justify-between">
               <div>
                 <span class="text-[10px] text-slate-400">${log.date} ・ ${log.duration}分</span>
-                <h4 class="text-sm font-bold text-white mt-0.5">${log.song_title}</h4>
+                <h4 class="text-sm font-bold text-white mt-0.5 flex items-center gap-2 flex-wrap">
+                  <span>${log.song_title}</span>
+                  ${log.score ? `
+                    <span class="text-[10px] bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-amber-300 font-extrabold px-2 py-0.5 rounded-full border border-amber-500/40 flex items-center gap-1 shadow-sm">
+                      <i data-lucide="trophy" class="w-3 h-3 text-amber-400"></i>
+                      ${log.score}点
+                    </span>
+                  ` : ''}
+                </h4>
               </div>
-              <div class="text-right">
-                <span class="text-[10px] bg-purple-500/20 text-purple-300 font-bold px-2 py-0.5 rounded-full border border-purple-500/30">
+              <div class="text-right space-y-1">
+                <span class="text-[10px] bg-purple-500/20 text-purple-300 font-bold px-2 py-0.5 rounded-full border border-purple-500/30 inline-block">
                   最高: ${formatKaraokeNote(log.highest_note)} (${log.highest_note})
                 </span>
+                ${log.key ? `
+                  <div class="text-[10px] text-cyan-300 font-semibold flex items-center justify-end gap-1">
+                    <span class="text-slate-400">キー:</span> <strong>${log.key}</strong>
+                  </div>
+                ` : ''}
               </div>
             </div>
 
@@ -1383,6 +1594,23 @@
     if (elements.btnQuickPractice) elements.btnQuickPractice.addEventListener('click', () => switchView('view-practice'));
     if (elements.btnQuickAi) elements.btnQuickAi.addEventListener('click', () => switchView('view-ai'));
 
+    if (elements.homeFavBanner) {
+      elements.homeFavBanner.addEventListener('click', () => {
+        switchView('view-songs');
+        currentFilter = 'favorite';
+        elements.filterChips.forEach(c => {
+          c.classList.remove('bg-purple-600', 'bg-amber-500', 'text-slate-950', 'text-white');
+          if (c.dataset.filter === 'favorite') {
+            c.classList.add('bg-amber-500', 'text-slate-950');
+            c.classList.remove('bg-surface-card', 'text-slate-300');
+          } else {
+            c.classList.add('bg-surface-card', 'text-slate-300');
+          }
+        });
+        renderSongList();
+      });
+    }
+
     if (elements.songSearchInput) elements.songSearchInput.addEventListener('input', renderSongList);
 
     if (elements.artistFilterSelect) {
@@ -1409,10 +1637,14 @@
     elements.filterChips.forEach(chip => {
       chip.addEventListener('click', () => {
         elements.filterChips.forEach(c => {
-          c.classList.remove('bg-purple-600', 'text-white');
+          c.classList.remove('bg-purple-600', 'bg-amber-500', 'text-slate-950', 'text-white');
           c.classList.add('bg-surface-card', 'text-slate-300');
         });
-        chip.classList.add('bg-purple-600', 'text-white');
+        if (chip.dataset.filter === 'favorite') {
+          chip.classList.add('bg-amber-500', 'text-slate-950');
+        } else {
+          chip.classList.add('bg-purple-600', 'text-white');
+        }
         chip.classList.remove('bg-surface-card', 'text-slate-300');
         currentFilter = chip.dataset.filter;
         renderSongList();
@@ -1734,6 +1966,8 @@
         const high = elements.logSelectHigh.value;
         const hard = elements.logInputHard.value.trim();
         const memo = elements.logInputMemo.value.trim();
+        const scoreVal = elements.logInputScore && elements.logInputScore.value ? parseFloat(elements.logInputScore.value) : null;
+        const keyVal = elements.logInputKey ? elements.logInputKey.value : '±0';
         const userProfile = getUserProfile();
 
         const advice = generatePracticeAdvice(song, hard, high, userProfile);
@@ -1744,6 +1978,8 @@
           duration,
           lowest_note: low,
           highest_note: high,
+          score: scoreVal,
+          key: keyVal,
           hard_parts: hard,
           memo,
           ai_advice: advice
@@ -1753,6 +1989,7 @@
         elements.modalPracticeLog.classList.remove('flex');
         elements.formAddPractice.reset();
         elements.logInputDate.value = new Date().toISOString().split('T')[0];
+        if (elements.logInputKey) elements.logInputKey.value = '±0';
 
         renderPracticeLogs();
         initGrowthChart();

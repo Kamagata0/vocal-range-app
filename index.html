@@ -46,7 +46,7 @@
   <meta name="apple-mobile-web-app-title" content="VocalAI">
   <meta name="theme-color" content="#090d16">
 
-  <link rel="stylesheet" href="css/style.css?v=10">
+  <link rel="stylesheet" href="css/style.css?v=11">
 </head>
 
 <body class="bg-[#090d16] text-slate-100 min-h-screen selection:bg-purple-500/30">
@@ -168,6 +168,23 @@
           </div>
         </div>
 
+        <!-- 十八番・セットリスト クイックアクセス -->
+        <div id="home-fav-banner" class="glass-panel p-3.5 rounded-2xl border border-amber-500/30 bg-amber-950/20 flex items-center justify-between cursor-pointer hover:bg-amber-950/35 active:scale-98 transition shadow-lg shadow-amber-950/20">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shrink-0">
+              <i data-lucide="star" class="w-5 h-5 fill-amber-400"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>十八番・歌う曲リスト</span>
+                <span id="home-fav-count-badge" class="text-[10px] bg-amber-500/20 text-amber-300 font-extrabold px-1.5 py-0.5 rounded-full border border-amber-500/30">0曲</span>
+              </h4>
+              <p class="text-[11px] text-slate-400 mt-0.5">登録したマイキーをカラオケで即確認！</p>
+            </div>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-amber-400"></i>
+        </div>
+
         <!-- クイックメニュー（ボタン一覧） -->
         <div class="grid grid-cols-3 gap-3">
           <button id="btn-quick-search"
@@ -239,6 +256,12 @@
             class="filter-chip active px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-purple-600 text-white transition"
             data-filter="all">すべて</button>
           <button
+            class="filter-chip px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-surface-card text-amber-300 border border-amber-500/40 hover:bg-amber-900/30 transition flex items-center gap-1"
+            data-filter="favorite">
+            <i data-lucide="star" class="w-3.5 h-3.5 fill-amber-400 text-amber-400"></i>
+            <span>十八番・歌う曲</span>
+          </button>
+          <button
             class="filter-chip px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-surface-card text-slate-300 border border-surface-border hover:bg-slate-800 transition"
             data-filter="fit">歌いやすい曲</button>
           <button
@@ -249,7 +272,7 @@
             data-filter="falsetto">裏声活用</button>
           <button
             class="filter-chip px-3 py-1.5 rounded-full text-xs font-medium whitespace-nowrap bg-surface-card text-purple-300 border border-purple-500/30 hover:bg-purple-900/30 transition"
-            data-filter="custom">★ マイ登録曲</button>
+            data-filter="custom">マイ登録曲</button>
         </div>
 
         <!-- 最高音クイックフィルター -->
@@ -469,6 +492,22 @@
           </button>
         </div>
 
+        <!-- 練習・カラオケサマリー統計 -->
+        <div class="grid grid-cols-3 gap-2.5">
+          <div class="glass-panel p-3 rounded-2xl border border-surface-border text-center">
+            <span class="text-[10px] text-slate-400 block font-medium">練習記録</span>
+            <span id="practice-stat-count" class="text-base font-black text-white">0回</span>
+          </div>
+          <div class="glass-panel p-3 rounded-2xl border border-surface-border text-center">
+            <span class="text-[10px] text-slate-400 block font-medium">最高スコア</span>
+            <span id="practice-stat-best-score" class="text-base font-black text-amber-400">--</span>
+          </div>
+          <div class="glass-panel p-3 rounded-2xl border border-surface-border text-center">
+            <span class="text-[10px] text-slate-400 block font-medium">十八番曲</span>
+            <span id="practice-stat-fav-count" class="text-base font-black text-purple-400">0曲</span>
+          </div>
+        </div>
+
         <!-- 成長グラフカード -->
         <div class="glass-panel p-5 rounded-3xl space-y-3">
           <div class="flex items-center justify-between">
@@ -626,6 +665,46 @@
           <div class="flex justify-between items-center">
             <span class="text-slate-400">おすすめキー調整</span>
             <span id="modal-song-rec-key" class="font-bold text-cyan-400">原曲キー (±0)</span>
+          </div>
+        </div>
+
+        <!-- ★ 十八番（お気に入り）＆ マイキー設定 -->
+        <div class="glass-panel p-3.5 rounded-2xl border border-amber-500/30 bg-amber-950/20 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-200 flex items-center gap-1.5">
+              <i data-lucide="star" class="w-4 h-4 text-amber-400 fill-amber-400"></i>
+              十八番・歌う曲リスト
+            </span>
+            <button type="button" id="btn-modal-toggle-fav" class="px-3 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm border">
+              <i data-lucide="star" class="w-3.5 h-3.5"></i>
+              <span id="modal-fav-btn-text">リストに追加</span>
+            </button>
+          </div>
+          <div class="flex items-center justify-between text-xs pt-1.5 border-t border-amber-500/20">
+            <div>
+              <span class="text-slate-300 text-[11px] font-semibold block">マイ歌唱キーメモ</span>
+              <span class="text-[9px] text-slate-400">カラオケで歌うキーを保存</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <select id="modal-select-my-key" class="px-2.5 py-1.5 bg-surface-card border border-amber-500/40 rounded-xl text-amber-300 font-black text-xs focus:outline-none">
+                <option value="±0">原曲キー (±0)</option>
+                <option value="-1">キー -1</option>
+                <option value="-2">キー -2</option>
+                <option value="-3">キー -3</option>
+                <option value="-4">キー -4</option>
+                <option value="-5">キー -5</option>
+                <option value="-6">キー -6</option>
+                <option value="+1">キー +1</option>
+                <option value="+2">キー +2</option>
+                <option value="+3">キー +3</option>
+                <option value="オク下">オク下 (±0)</option>
+                <option value="オク下+2">オク下 +2</option>
+                <option value="オク下+4">オク下 +4</option>
+              </select>
+              <button type="button" id="btn-modal-save-my-key" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 active:scale-95 text-slate-950 rounded-xl text-xs font-black transition shadow-md">
+                保存
+              </button>
+            </div>
           </div>
         </div>
 
@@ -860,6 +939,40 @@
             </div>
           </div>
 
+          <!-- カラオケ結果・採点スコア & 歌唱キー -->
+          <div class="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-purple-950/25 border border-purple-500/25">
+            <div>
+              <label class="text-purple-300 font-bold block mb-1 text-[11px] flex items-center gap-1">
+                <i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i>
+                採点スコア (任意)
+              </label>
+              <input type="number" step="0.1" min="0" max="100" id="log-input-score" placeholder="例: 89.5"
+                class="w-full px-3 py-2 bg-surface-input border border-surface-border rounded-xl text-white text-xs focus:outline-none focus:border-purple-500">
+            </div>
+            <div>
+              <label class="text-purple-300 font-bold block mb-1 text-[11px] flex items-center gap-1">
+                <i data-lucide="sliders" class="w-3.5 h-3.5 text-cyan-400"></i>
+                歌ったキー
+              </label>
+              <select id="log-input-key"
+                class="w-full px-2.5 py-2 bg-surface-input border border-surface-border rounded-xl text-white text-xs focus:outline-none focus:border-purple-500">
+                <option value="±0">原曲キー (±0)</option>
+                <option value="-1">キー -1</option>
+                <option value="-2">キー -2</option>
+                <option value="-3">キー -3</option>
+                <option value="-4">キー -4</option>
+                <option value="-5">キー -5</option>
+                <option value="-6">キー -6</option>
+                <option value="+1">キー +1</option>
+                <option value="+2">キー +2</option>
+                <option value="+3">キー +3</option>
+                <option value="オク下">オク下 (±0)</option>
+                <option value="オク下+2">オク下 +2</option>
+                <option value="オク下+4">オク下 +4</option>
+              </select>
+            </div>
+          </div>
+
           <div>
             <label class="text-slate-300 font-medium block mb-1">難しかった部分・課題</label>
             <input type="text" id="log-input-hard" placeholder="例: サビのファルセットへの切り替え、ラスサビの息継ぎ"
@@ -972,7 +1085,7 @@
 
   </div>
 
-  <script src="js/app.js?v=10"></script>
+  <script src="js/app.js?v=11"></script>
 </body>
 
 </html>
