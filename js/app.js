@@ -1947,7 +1947,7 @@
 
     if (elements.btnCopyLiveUrl) {
       elements.btnCopyLiveUrl.addEventListener('click', () => {
-        const liveUrl = 'https://kamagata0.github.io/vocal-range-app/';
+        const liveUrl = (window.location.protocol.startsWith('http')) ? window.location.href.split('#')[0].split('?')[0] : 'https://kam2525-hub.github.io/vocal-range-app/';
         navigator.clipboard.writeText(liveUrl).then(() => {
           showToast('公開URLをコピーしました！');
         }).catch(() => {
@@ -2417,7 +2417,7 @@
       ctx.fillStyle = '#94a3b8';
       ctx.font = '13px "Plus Jakarta Sans", sans-serif';
       ctx.textAlign = 'right';
-      ctx.fillText('https://kamagata0.github.io/vocal-range-app/', w - 60, footY + 36);
+      ctx.fillText('https://kam2525-hub.github.io/vocal-range-app/', w - 60, footY + 36);
       ctx.textAlign = 'left';
     }
 
@@ -2452,7 +2452,7 @@
           const recSongs = allSongs.filter(s => calculateCompatibility(profile, s).title === '歌いやすそう').slice(0, 2);
           const songText = recSongs.map(s => `『${s.title}』`).join('や');
 
-          const text = `【VocalAI】私の声の音域を診断しました！\n🎙️ 地声音域: ${chestLowK} 〜 ${chestHighK}\n✨ 裏声音域: ${falsettoLowK} 〜 ${falsettoHighK}\nぴったり歌える曲: ${songText || '最新ヒット曲'}\n\n自分の音域と相性曲を無料診断👇\nhttps://kamagata0.github.io/vocal-range-app/\n#VocalAI #音域診断 #カラオケ`;
+          const text = `【VocalAI】私の声の音域を診断しました！\n🎙️ 地声音域: ${chestLowK} 〜 ${chestHighK}\n✨ 裏声音域: ${falsettoLowK} 〜 ${falsettoHighK}\nぴったり歌える曲: ${songText || '最新ヒット曲'}\n\n自分の音域と相性曲を無料診断👇\nhttps://kam2525-hub.github.io/vocal-range-app/\n#VocalAI #音域診断 #カラオケ`;
           const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
           window.open(url, '_blank');
         });
@@ -2487,7 +2487,7 @@
                   await navigator.share({
                     title: 'VocalAI 音域診断カード',
                     text: shareText,
-                    url: 'https://kamagata0.github.io/vocal-range-app/'
+                    url: 'https://kam2525-hub.github.io/vocal-range-app/'
                   });
                 }
               });
