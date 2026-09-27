@@ -17,6 +17,15 @@ body {
   user-select: none;
 }
 
+/* 画面切り替えの確実な非表示 */
+.hidden {
+  display: none !important;
+}
+
+section[id^="view-"] {
+  width: 100%;
+}
+
 /* スクロールバーの非表示（アプリ感演出） */
 .no-scrollbar::-webkit-scrollbar {
   display: none;

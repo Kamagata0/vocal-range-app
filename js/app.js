@@ -762,10 +762,23 @@
     }
 
     function switchView(targetViewId) {
-      Object.values(elements.views).forEach(v => v && v.classList.add('hidden'));
-      if (elements.views[targetViewId]) {
-        elements.views[targetViewId].classList.remove('hidden');
+      // 1. 全画面を確実に非表示
+      Object.keys(elements.views).forEach(key => {
+        const view = elements.views[key];
+        if (view) {
+          view.classList.add('hidden');
+          view.style.display = 'none';
+        }
+      });
+
+      // 2. 対象画面だけを確実に表示
+      const targetView = elements.views[targetViewId];
+      if (targetView) {
+        targetView.classList.remove('hidden');
+        targetView.style.display = 'block';
       }
+
+      // 3. ナビゲーションバーのアクティブ表示更新
       elements.navItems.forEach(item => {
         if (item.dataset.target === targetViewId) {
           item.classList.add('text-purple-400');
@@ -775,7 +788,14 @@
           item.classList.add('text-slate-400');
         }
       });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // 4. 即座にスクロール位置を最上部にリセット（smoothの遅延やバグを排除）
+      window.scrollTo(0, 0);
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+      const mainEl = document.querySelector('main');
+      if (mainEl) mainEl.scrollTop = 0;
+
       if (targetViewId === 'view-practice') {
         setTimeout(initGrowthChart, 50);
       }
