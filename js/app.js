@@ -641,12 +641,40 @@
 
   // ================= 7. アプリケーション コントローラー =================
   let currentFilter = 'all';
+  let selectedHighestFilter = 'all';
   let selectedArtist = '';
   let isMicRunning = false;
   let currentMicMode = 'chest'; // 'chest' または 'falsetto'
   let detectedMinMidi = null;
   let detectedMaxMidi = null;
   let growthChartInstance = null;
+  let currentKeyShift = 0;
+  let currentModalSong = null;
+  let audioCtx = null;
+
+  // ピアノ・基準音シンセサイザー（Web Audio API）
+  function playPitchTone(midiNote, duration = 1.0) {
+    try {
+      const AudioCtxClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioCtxClass) return;
+      if (!audioCtx) audioCtx = new AudioCtxClass();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const freq = 440 * Math.pow(2, (midiNote - 69) / 12);
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.35, audioCtx.currentTime + 0.04);
+      gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duration);
+    } catch (e) {
+      console.warn('Audio tone error:', e);
+    }
+  }
 
   function initApp() {
     const elements = {
@@ -754,6 +782,28 @@
       modalSongTags: document.getElementById('modal-song-tags'),
       modalSongFocus: document.getElementById('modal-song-focus'),
       btnModalRecordSong: document.getElementById('btn-modal-record-song'),
+
+      // キー変更シミュレーター
+      keyShiftButtons: document.querySelectorAll('.btn-key-shift'),
+      keyShiftCurrentLabel: document.getElementById('key-shift-current-label'),
+      keyShiftHighestNote: document.getElementById('key-shift-highest-note'),
+      btnPlayShiftedTone: document.getElementById('btn-play-shifted-tone'),
+      keyShiftStatusPill: document.getElementById('key-shift-status-pill'),
+
+      // ピアノ基準音 & 最高音フィルター
+      pianoKeysContainer: document.getElementById('piano-keys-container'),
+      pianoPlayingNote: document.getElementById('piano-playing-note'),
+      highestFilterChips: document.querySelectorAll('.highest-filter-chip'),
+      highestFilterLabel: document.getElementById('highest-filter-label'),
+
+      // 音域診断SNSシェア
+      btnHomeShareCard: document.getElementById('btn-home-share-card'),
+      modalShareCard: document.getElementById('modal-share-card'),
+      btnCloseShareModal: document.getElementById('btn-close-share-modal'),
+      shareCardCanvas: document.getElementById('share-card-canvas'),
+      btnShareToX: document.getElementById('btn-share-to-x'),
+      btnDownloadShareCard: document.getElementById('btn-download-share-card'),
+      btnNativeShareCard: document.getElementById('btn-native-share-card'),
 
       // AIチャット
       aiChatMessages: document.getElementById('ai-chat-messages'),
@@ -950,6 +1000,18 @@
         const matchQuery = song.title.toLowerCase().includes(query) || song.artist.toLowerCase().includes(query);
         if (!matchQuery) return false;
 
+        // 最高音フィルター
+        if (selectedHighestFilter !== 'all') {
+          const songHighMidi = noteToMidi(song.highest_note);
+          const songHighKaraoke = getKaraokeNoteName(songHighMidi);
+          if (selectedHighestFilter === 'hiD+') {
+            const hiDMidi = noteToMidi('D5') || 74;
+            if (!songHighMidi || songHighMidi < hiDMidi) return false;
+          } else {
+            if (songHighKaraoke !== selectedHighestFilter) return false;
+          }
+        }
+
         if (currentFilter === 'all') return true;
         if (currentFilter === 'custom') return song.is_custom === true;
         const compat = calculateCompatibility(userProfile, song);
@@ -1061,6 +1123,11 @@
           renderSongList();
         };
       }
+
+      // キー変更シミュレーターの初期化
+      currentModalSong = song;
+      currentKeyShift = 0;
+      updateKeyShiftSimulator();
 
       elements.modalSongDetail.classList.remove('hidden');
       elements.modalSongDetail.classList.add('flex');
@@ -1668,6 +1735,446 @@
       btn.addEventListener('click', () => sendAIMessage(btn.textContent.trim()));
     });
 
+    // ================= 1. キー変更シミュレーター =================
+    function updateKeyShiftSimulator() {
+      if (!currentModalSong) return;
+      const userProfile = getUserProfile();
+      const highestMidi = noteToMidi(currentModalSong.highest_note);
+      if (!highestMidi) return;
+      const shiftedMidi = highestMidi + currentKeyShift;
+      const shiftedNote = midiToNote(shiftedMidi);
+      const shiftedKaraoke = getKaraokeNoteName(shiftedMidi);
+
+      if (elements.keyShiftCurrentLabel) {
+        if (currentKeyShift === 0) {
+          elements.keyShiftCurrentLabel.textContent = '原曲キー (±0)';
+        } else if (currentKeyShift > 0) {
+          elements.keyShiftCurrentLabel.textContent = `キー +${currentKeyShift}`;
+        } else {
+          elements.keyShiftCurrentLabel.textContent = `キー ${currentKeyShift}`;
+        }
+      }
+
+      if (elements.keyShiftHighestNote) {
+        elements.keyShiftHighestNote.textContent = `${shiftedKaraoke} (${shiftedNote})`;
+      }
+
+      if (elements.keyShiftButtons) {
+        elements.keyShiftButtons.forEach(btn => {
+          const shiftVal = parseInt(btn.dataset.shift, 10);
+          if (shiftVal === currentKeyShift) {
+            btn.className = 'btn-key-shift active py-1.5 rounded-lg text-xs font-extrabold bg-purple-600 text-white shadow transition';
+          } else {
+            btn.className = 'btn-key-shift py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition';
+          }
+        });
+      }
+
+      const userChestHighMidi = noteToMidi(userProfile.chest_high) || 67;
+      if (elements.keyShiftStatusPill) {
+        if (shiftedMidi <= userChestHighMidi) {
+          elements.keyShiftStatusPill.className = 'text-[11px] font-semibold text-emerald-400 flex items-center gap-1';
+          elements.keyShiftStatusPill.innerHTML = `<i data-lucide="check-circle-2" class="w-3.5 h-3.5 text-emerald-400"></i><span>あなたの地声音域で歌えます！</span>`;
+        } else if (shiftedMidi === userChestHighMidi + 1) {
+          elements.keyShiftStatusPill.className = 'text-[11px] font-semibold text-amber-400 flex items-center gap-1';
+          elements.keyShiftStatusPill.innerHTML = `<i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i><span>高音張り上げ練習にピッタリなキー！</span>`;
+        } else {
+          elements.keyShiftStatusPill.className = 'text-[11px] font-semibold text-rose-400 flex items-center gap-1';
+          elements.keyShiftStatusPill.innerHTML = `<i data-lucide="alert-circle" class="w-3.5 h-3.5 text-rose-400"></i><span>地声では高め（さらに下げるか裏声活用）</span>`;
+        }
+        if (window.lucide) window.lucide.createIcons();
+      }
+    }
+
+    function initKeyShiftSimulator() {
+      if (elements.keyShiftButtons) {
+        elements.keyShiftButtons.forEach(btn => {
+          btn.addEventListener('click', () => {
+            currentKeyShift = parseInt(btn.dataset.shift, 10);
+            updateKeyShiftSimulator();
+          });
+        });
+      }
+
+      if (elements.btnPlayShiftedTone) {
+        elements.btnPlayShiftedTone.addEventListener('click', () => {
+          if (!currentModalSong) return;
+          const highestMidi = noteToMidi(currentModalSong.highest_note);
+          if (highestMidi) {
+            playPitchTone(highestMidi + currentKeyShift, 1.2);
+          }
+        });
+      }
+    }
+
+    // ================= 2. ピアノ基準音ガイド =================
+    function initPianoKeys() {
+      if (!elements.pianoKeysContainer) return;
+      const pianoNotes = [
+        { midi: 48, label: 'mid1C', sub: 'C3' },
+        { midi: 50, label: 'mid1D', sub: 'D3' },
+        { midi: 52, label: 'mid1E', sub: 'E3' },
+        { midi: 53, label: 'mid1F', sub: 'F3' },
+        { midi: 55, label: 'mid1G', sub: 'G3' },
+        { midi: 56, label: 'mid1G#', sub: 'G#3', isBlack: true },
+        { midi: 57, label: 'mid2A', sub: 'A3' },
+        { midi: 59, label: 'mid2B', sub: 'B3' },
+        { midi: 60, label: 'mid2C', sub: 'C4' },
+        { midi: 62, label: 'mid2D', sub: 'D4' },
+        { midi: 64, label: 'mid2E', sub: 'E4' },
+        { midi: 65, label: 'mid2F', sub: 'F4' },
+        { midi: 66, label: 'mid2F#', sub: 'F#4', isBlack: true },
+        { midi: 67, label: 'mid2G', sub: 'G4' },
+        { midi: 68, label: 'mid2G#', sub: 'G#4', isBlack: true },
+        { midi: 69, label: 'hiA', sub: 'A4', isHighlight: true },
+        { midi: 70, label: 'hiA#', sub: 'A#4', isBlack: true },
+        { midi: 71, label: 'hiB', sub: 'B4' },
+        { midi: 72, label: 'hiC', sub: 'C5', isHighlight: true },
+        { midi: 74, label: 'hiD', sub: 'D5' }
+      ];
+
+      elements.pianoKeysContainer.innerHTML = pianoNotes.map(n => {
+        const bgClass = n.isHighlight
+          ? 'bg-gradient-to-b from-purple-900/60 to-purple-950 border-purple-500/50 text-purple-200 shadow-purple-900/30'
+          : n.isBlack
+            ? 'bg-slate-900 border-slate-700 text-purple-300'
+            : 'bg-surface-card border-surface-border text-slate-200';
+        return `
+          <button type="button" class="piano-key-btn ${bgClass} border rounded-xl px-2.5 py-2 flex flex-col items-center justify-center min-w-[52px] shadow-sm hover:border-purple-400 active:scale-95 transition" data-midi="${n.midi}" data-label="${n.label}" data-sub="${n.sub}">
+            <span class="text-xs font-extrabold">${n.label}</span>
+            <span class="text-[9px] text-slate-400 font-medium">${n.sub}</span>
+          </button>
+        `;
+      }).join('');
+
+      elements.pianoKeysContainer.querySelectorAll('.piano-key-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const midi = parseInt(btn.dataset.midi, 10);
+          const label = btn.dataset.label;
+          const sub = btn.dataset.sub;
+          btn.classList.add('playing');
+          setTimeout(() => btn.classList.remove('playing'), 300);
+          playPitchTone(midi, 1.2);
+          if (elements.pianoPlayingNote) {
+            elements.pianoPlayingNote.innerHTML = `🎵 <strong class="text-cyan-300 font-bold">${label} (${sub})</strong> を発音中！この高さに合わせて声を出してみよう`;
+          }
+        });
+      });
+    }
+
+    // ================= 3. 最高音クイックフィルター =================
+    function initHighestFilters() {
+      if (!elements.highestFilterChips) return;
+      elements.highestFilterChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+          elements.highestFilterChips.forEach(c => {
+            c.classList.remove('active', 'bg-purple-600', 'text-white', 'shadow-sm');
+            c.classList.add('bg-surface-card', 'text-slate-300');
+          });
+          chip.classList.add('active', 'bg-purple-600', 'text-white', 'shadow-sm');
+          chip.classList.remove('bg-surface-card', 'text-slate-300');
+
+          selectedHighestFilter = chip.dataset.highest || 'all';
+          if (elements.highestFilterLabel) {
+            elements.highestFilterLabel.textContent = chip.textContent.trim();
+          }
+          renderSongList();
+        });
+      });
+    }
+
+    // ================= 4. 音域診断結果SNSシェアカード =================
+    function drawShareCard(canvas, profile) {
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      const w = 800;
+      const h = 960;
+      canvas.width = w;
+      canvas.height = h;
+
+      // 1. 背景グラデーション
+      const bgGrad = ctx.createLinearGradient(0, 0, w, h);
+      bgGrad.addColorStop(0, '#090d16');
+      bgGrad.addColorStop(0.5, '#130d2a');
+      bgGrad.addColorStop(1, '#08111e');
+      ctx.fillStyle = bgGrad;
+      ctx.fillRect(0, 0, w, h);
+
+      // オーブグロー
+      const glow1 = ctx.createRadialGradient(150, 150, 20, 150, 150, 300);
+      glow1.addColorStop(0, 'rgba(124, 58, 237, 0.28)');
+      glow1.addColorStop(1, 'rgba(124, 58, 237, 0)');
+      ctx.fillStyle = glow1;
+      ctx.fillRect(0, 0, 500, 500);
+
+      const glow2 = ctx.createRadialGradient(650, 750, 20, 650, 750, 350);
+      glow2.addColorStop(0, 'rgba(6, 182, 212, 0.25)');
+      glow2.addColorStop(1, 'rgba(6, 182, 212, 0)');
+      ctx.fillStyle = glow2;
+      ctx.fillRect(300, 400, 500, 560);
+
+      // 外枠
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.12)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(30, 30, w - 60, h - 60, 28);
+      ctx.stroke();
+
+      // 2. ヘッダー
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 36px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('VocalAI', 60, 95);
+
+      ctx.fillStyle = '#a78bfa';
+      ctx.font = 'bold 16px "Noto Sans JP", sans-serif';
+      ctx.fillText('AI歌唱・音域分析カルテ', 225, 93);
+
+      const now = new Date();
+      const dateStr = `${now.getFullYear()}.${String(now.getMonth() + 1).padStart(2, '0')}.${String(now.getDate()).padStart(2, '0')}`;
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '14px "Noto Sans JP", sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`診断日: ${dateStr}`, w - 60, 93);
+      ctx.textAlign = 'left';
+
+      // 区切り線
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.beginPath();
+      ctx.moveTo(60, 120);
+      ctx.lineTo(w - 60, 120);
+      ctx.stroke();
+
+      // 3. ユーザー名
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 26px "Noto Sans JP", sans-serif';
+      ctx.fillText(`${profile.name || 'あなた'} さんの音域診断結果`, 60, 175);
+
+      // 4. 地声音域カード & 裏声音域カード
+      const cardW = 325;
+      const cardH = 150;
+      const cardY = 210;
+
+      // 地声
+      ctx.fillStyle = 'rgba(24, 34, 52, 0.85)';
+      ctx.beginPath();
+      ctx.roundRect(60, cardY, cardW, cardH, 20);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(168, 85, 247, 0.45)';
+      ctx.stroke();
+
+      ctx.fillStyle = '#c084fc';
+      ctx.font = 'bold 15px "Noto Sans JP", sans-serif';
+      ctx.fillText('● 地声（チェストボイス）', 80, cardY + 38);
+
+      const chestLowK = formatKaraokeNote(profile.chest_low);
+      const chestHighK = formatKaraokeNote(profile.chest_high);
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '900 32px "Plus Jakarta Sans", "Noto Sans JP", sans-serif';
+      ctx.fillText(`${chestLowK} 〜 ${chestHighK}`, 80, cardY + 86);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '14px "Noto Sans JP", sans-serif';
+      ctx.fillText(`原音: ${profile.chest_low} 〜 ${profile.chest_high}`, 80, cardY + 120);
+
+      // 裏声
+      ctx.fillStyle = 'rgba(24, 34, 52, 0.85)';
+      ctx.beginPath();
+      ctx.roundRect(415, cardY, cardW, cardH, 20);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(6, 182, 212, 0.45)';
+      ctx.stroke();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 15px "Noto Sans JP", sans-serif';
+      ctx.fillText('● 裏声（ファルセット）', 435, cardY + 38);
+
+      const falsettoLowK = formatKaraokeNote(profile.falsetto_low);
+      const falsettoHighK = formatKaraokeNote(profile.falsetto_high);
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '900 32px "Plus Jakarta Sans", "Noto Sans JP", sans-serif';
+      ctx.fillText(`${falsettoLowK} 〜 ${falsettoHighK}`, 435, cardY + 86);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '14px "Noto Sans JP", sans-serif';
+      ctx.fillText(`原音: ${profile.falsetto_low} 〜 ${profile.falsetto_high}`, 435, cardY + 120);
+
+      // 5. 音域バー
+      const barY = 395;
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = 'bold 12px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('lowC', 60, barY);
+      ctx.fillText('mid1C', 205, barY);
+      ctx.fillText('mid2C', 380, barY);
+      ctx.fillText('hiC', 560, barY);
+      ctx.fillText('hihiC', 700, barY);
+
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.roundRect(60, barY + 10, w - 120, 16, 8);
+      ctx.fill();
+
+      const chestLowMidi = noteToMidi(profile.chest_low) || 48;
+      const falsettoHighMidi = noteToMidi(profile.falsetto_high) || 72;
+      const minM = 36;
+      const maxM = 84;
+      const startPct = Math.max(0, Math.min(1, (chestLowMidi - minM) / (maxM - minM)));
+      const endPct = Math.max(0, Math.min(1, (falsettoHighMidi - minM) / (maxM - minM)));
+      const fillX = 60 + startPct * (w - 120);
+      const fillW = Math.max(20, (endPct - startPct) * (w - 120));
+
+      const barGrad = ctx.createLinearGradient(fillX, 0, fillX + fillW, 0);
+      barGrad.addColorStop(0, '#8b5cf6');
+      barGrad.addColorStop(1, '#06b6d4');
+      ctx.fillStyle = barGrad;
+      ctx.beginPath();
+      ctx.roundRect(fillX, barY + 10, fillW, 16, 8);
+      ctx.fill();
+
+      // 6. おすすめ楽曲
+      const songSecY = 460;
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 20px "Noto Sans JP", sans-serif';
+      ctx.fillText('🎯 あなたの声にぴったり歌いやすい曲', 60, songSecY);
+
+      const allSongs = getAllSongs();
+      const recSongs = allSongs.filter(s => {
+        const c = calculateCompatibility(profile, s);
+        return c.title === '歌いやすそう';
+      }).slice(0, 3);
+
+      const songListToDraw = recSongs.length >= 2 ? recSongs : allSongs.slice(0, 3);
+      songListToDraw.forEach((song, idx) => {
+        const sy = songSecY + 30 + idx * 95;
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.7)';
+        ctx.beginPath();
+        ctx.roundRect(60, sy, w - 120, 80, 16);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.06)';
+        ctx.stroke();
+
+        ctx.fillStyle = '#8b5cf6';
+        ctx.font = 'bold 20px "Plus Jakarta Sans", sans-serif';
+        ctx.fillText(`#${idx + 1}`, 85, sy + 48);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 18px "Noto Sans JP", sans-serif';
+        ctx.fillText(song.title, 130, sy + 36);
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '14px "Noto Sans JP", sans-serif';
+        ctx.fillText(song.artist, 130, sy + 62);
+
+        const highK = formatKaraokeNote(song.highest_note);
+        ctx.fillStyle = 'rgba(168, 85, 247, 0.2)';
+        ctx.beginPath();
+        ctx.roundRect(w - 240, sy + 25, 160, 32, 10);
+        ctx.fill();
+        ctx.fillStyle = '#c084fc';
+        ctx.font = 'bold 14px "Noto Sans JP", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(`最高音: ${highK}`, w - 160, sy + 47);
+        ctx.textAlign = 'left';
+      });
+
+      // 7. フッター
+      const footY = 860;
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+      ctx.beginPath();
+      ctx.moveTo(60, footY);
+      ctx.lineTo(w - 60, footY);
+      ctx.stroke();
+
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = 'bold 14px "Plus Jakarta Sans", sans-serif';
+      ctx.fillText('VocalAI - 無料カラオケ音域診断＆トレーナー', 60, footY + 36);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '13px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText('https://kamagata0.github.io/vocal-range-app/', w - 60, footY + 36);
+      ctx.textAlign = 'left';
+    }
+
+    function openShareCardModal() {
+      if (!elements.modalShareCard || !elements.shareCardCanvas) return;
+      const userProfile = getUserProfile();
+      drawShareCard(elements.shareCardCanvas, userProfile);
+      elements.modalShareCard.classList.remove('hidden');
+      elements.modalShareCard.classList.add('flex');
+    }
+
+    function initShareCard() {
+      if (elements.btnHomeShareCard) {
+        elements.btnHomeShareCard.addEventListener('click', () => openShareCardModal());
+      }
+      if (elements.btnCloseShareModal && elements.modalShareCard) {
+        elements.btnCloseShareModal.addEventListener('click', () => {
+          elements.modalShareCard.classList.add('hidden');
+          elements.modalShareCard.classList.remove('flex');
+        });
+      }
+
+      if (elements.btnShareToX) {
+        elements.btnShareToX.addEventListener('click', () => {
+          const profile = getUserProfile();
+          const chestLowK = formatKaraokeNote(profile.chest_low);
+          const chestHighK = formatKaraokeNote(profile.chest_high);
+          const falsettoLowK = formatKaraokeNote(profile.falsetto_low);
+          const falsettoHighK = formatKaraokeNote(profile.falsetto_high);
+
+          const allSongs = getAllSongs();
+          const recSongs = allSongs.filter(s => calculateCompatibility(profile, s).title === '歌いやすそう').slice(0, 2);
+          const songText = recSongs.map(s => `『${s.title}』`).join('や');
+
+          const text = `【VocalAI】私の声の音域を診断しました！\n🎙️ 地声音域: ${chestLowK} 〜 ${chestHighK}\n✨ 裏声音域: ${falsettoLowK} 〜 ${falsettoHighK}\nぴったり歌える曲: ${songText || '最新ヒット曲'}\n\n自分の音域と相性曲を無料診断👇\nhttps://kamagata0.github.io/vocal-range-app/\n#VocalAI #音域診断 #カラオケ`;
+          const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`;
+          window.open(url, '_blank');
+        });
+      }
+
+      if (elements.btnDownloadShareCard && elements.shareCardCanvas) {
+        elements.btnDownloadShareCard.addEventListener('click', () => {
+          const dataUrl = elements.shareCardCanvas.toDataURL('image/png');
+          const a = document.createElement('a');
+          a.download = `VocalAI_音域診断カルテ_${new Date().toISOString().split('T')[0]}.png`;
+          a.href = dataUrl;
+          a.click();
+          showToast('診断カード画像を保存しました！');
+        });
+      }
+
+      if (elements.btnNativeShareCard && elements.shareCardCanvas) {
+        elements.btnNativeShareCard.addEventListener('click', async () => {
+          const profile = getUserProfile();
+          const shareText = `私の声の音域は【地声: ${formatKaraokeNote(profile.chest_low)}〜${formatKaraokeNote(profile.chest_high)}】でした！ #VocalAI`;
+          try {
+            if (navigator.share) {
+              elements.shareCardCanvas.toBlob(async (blob) => {
+                if (blob && navigator.canShare && navigator.canShare({ files: [new File([blob], 'vocal-ai.png', { type: 'image/png' })] })) {
+                  const file = new File([blob], 'vocal-ai-range.png', { type: 'image/png' });
+                  await navigator.share({
+                    title: 'VocalAI 音域診断カード',
+                    text: shareText,
+                    files: [file]
+                  });
+                } else {
+                  await navigator.share({
+                    title: 'VocalAI 音域診断カード',
+                    text: shareText,
+                    url: 'https://kamagata0.github.io/vocal-range-app/'
+                  });
+                }
+              });
+            } else {
+              elements.btnDownloadShareCard.click();
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        });
+      }
+    }
+
     // 起動時の初期レンダリング
     populateNoteSelectors();
     populateArtistFilter();
@@ -1676,6 +2183,10 @@
     renderHomeRecommendations();
     renderPracticeLogs();
     initGrowthChart();
+    initPianoKeys();
+    initHighestFilters();
+    initKeyShiftSimulator();
+    initShareCard();
 
     if (elements.logInputDate) {
       elements.logInputDate.value = new Date().toISOString().split('T')[0];

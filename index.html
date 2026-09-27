@@ -46,7 +46,7 @@
   <meta name="apple-mobile-web-app-title" content="VocalAI">
   <meta name="theme-color" content="#090d16">
 
-  <link rel="stylesheet" href="css/style.css?v=7">
+  <link rel="stylesheet" href="css/style.css?v=8">
 </head>
 
 <body class="bg-[#090d16] text-slate-100 min-h-screen selection:bg-purple-500/30">
@@ -157,6 +157,15 @@
                 style="left: 30%; width: 45%;"></div>
             </div>
           </div>
+
+          <!-- シェアカード生成ボタン -->
+          <div class="pt-2">
+            <button id="btn-home-share-card" type="button"
+              class="w-full py-2.5 px-4 bg-gradient-to-r from-purple-600 via-indigo-600 to-cyan-500 hover:brightness-110 active:scale-95 text-white font-bold text-xs rounded-xl shadow-md shadow-purple-600/20 transition flex items-center justify-center gap-2">
+              <i data-lucide="share-2" class="w-4 h-4 text-cyan-200"></i>
+              <span>音域診断カードを画像でシェア / 保存</span>
+            </button>
+          </div>
         </div>
 
         <!-- クイックメニュー（ボタン一覧） -->
@@ -243,6 +252,29 @@
             data-filter="custom">★ マイ登録曲</button>
         </div>
 
+        <!-- 最高音クイックフィルター -->
+        <div class="space-y-1.5 pt-1">
+          <div class="flex items-center justify-between text-[11px] text-slate-400 px-0.5">
+            <span class="font-bold flex items-center gap-1 text-slate-300">
+              <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+              最高音で絞り込み
+            </span>
+            <span id="highest-filter-label" class="text-[10px] text-purple-400 font-semibold">指定なし</span>
+          </div>
+          <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5" id="highest-filter-chips">
+            <button class="highest-filter-chip active px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap bg-purple-600 text-white transition shadow-sm" data-highest="all">指定なし</button>
+            <button class="highest-filter-chip px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap bg-surface-card text-slate-300 border border-surface-border hover:bg-slate-800 transition" data-highest="mid2F">mid2F</button>
+            <button class="highest-filter-chip px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap bg-surface-card text-slate-300 border border-surface-border hover:bg-slate-800 transition" data-highest="mid2F#">mid2F#</button>
+            <button class="highest-filter-chip px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap bg-surface-card text-slate-300 border border-surface-border hover:bg-slate-800 transition" data-highest="mid2G">mid2G</button>
+            <button class="highest-filter-chip px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap bg-surface-card text-slate-300 border border-surface-border hover:bg-slate-800 transition" data-highest="mid2G#">mid2G#</button>
+            <button class="highest-filter-chip px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap bg-surface-card text-amber-300 border border-amber-500/30 hover:bg-amber-900/20 transition" data-highest="hiA">★ hiA</button>
+            <button class="highest-filter-chip px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap bg-surface-card text-amber-300 border border-amber-500/30 hover:bg-amber-900/20 transition" data-highest="hiA#">hiA#</button>
+            <button class="highest-filter-chip px-2.5 py-1 rounded-lg text-[11px] font-bold whitespace-nowrap bg-surface-card text-rose-300 border border-rose-500/30 hover:bg-rose-900/20 transition" data-highest="hiB">hiB</button>
+            <button class="highest-filter-chip px-2.5 py-1 rounded-lg text-[11px] font-black whitespace-nowrap bg-surface-card text-cyan-300 border border-cyan-500/30 hover:bg-cyan-900/20 transition" data-highest="hiC">★ hiC</button>
+            <button class="highest-filter-chip px-2.5 py-1 rounded-lg text-[11px] font-medium whitespace-nowrap bg-surface-card text-slate-300 border border-surface-border hover:bg-slate-800 transition" data-highest="hiD+">hiD以上</button>
+          </div>
+        </div>
+
         <!-- 楽曲リスト -->
         <div id="song-list-container" class="space-y-3">
           <!-- JSで動的レンダリング -->
@@ -301,6 +333,30 @@
               <span>マイク測定を開始する</span>
             </button>
             <p id="mic-status-msg" class="text-[11px] text-slate-400 mt-2.5 leading-relaxed">※地声（普段の話し声の延長）で、無理のない「一番低い声」と「一番高い声」を「あー」と出してください</p>
+          </div>
+        </div>
+
+        <!-- 🎹 ピアノ基準音ガイドカード -->
+        <div class="glass-panel p-4 rounded-3xl border border-surface-border space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5">
+              <i data-lucide="music" class="w-4 h-4 text-cyan-400"></i>
+              ピアノ基準音（タップして音を聴く）
+            </span>
+            <span class="text-[10px] bg-cyan-500/15 text-cyan-300 px-2 py-0.5 rounded-full font-semibold">音当てガイド♪</span>
+          </div>
+          <p class="text-[11px] text-slate-400 leading-tight">
+            鍵盤をタップすると手本の音がポーンと鳴ります。この高さに合わせて「あー」と声を出してみましょう！
+          </p>
+          
+          <!-- ミニ鍵盤 / クイックトーンセレクター -->
+          <div class="overflow-x-auto no-scrollbar py-1">
+            <div id="piano-keys-container" class="flex gap-1.5 min-w-max pb-1">
+              <!-- JSで主要音を動的生成 -->
+            </div>
+          </div>
+          <div id="piano-playing-note" class="text-center text-[11px] text-cyan-300 font-semibold min-h-[18px]">
+            鍵盤をタップすると音が鳴ります♪
           </div>
         </div>
 
@@ -572,6 +628,46 @@
           </div>
         </div>
 
+        <!-- 🎚️ リアルタイム・キー変更シミュレーター -->
+        <div class="bg-surface-card/90 p-3.5 rounded-2xl border border-surface-border space-y-2.5">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-white flex items-center gap-1.5">
+              <i data-lucide="sliders" class="w-3.5 h-3.5 text-purple-400"></i>
+              キー変更シミュレーター
+            </span>
+            <span id="key-shift-current-label" class="text-xs font-black text-cyan-400">原曲キー (±0)</span>
+          </div>
+
+          <!-- キー増減ボタン群 -->
+          <div class="grid grid-cols-7 gap-1 text-center" id="key-shift-buttons">
+            <button type="button" class="btn-key-shift py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-shift="-3">-3</button>
+            <button type="button" class="btn-key-shift py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-shift="-2">-2</button>
+            <button type="button" class="btn-key-shift py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-shift="-1">-1</button>
+            <button type="button" class="btn-key-shift active py-1.5 rounded-lg text-xs font-extrabold bg-purple-600 text-white shadow transition" data-shift="0">±0</button>
+            <button type="button" class="btn-key-shift py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-shift="1">+1</button>
+            <button type="button" class="btn-key-shift py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-shift="2">+2</button>
+            <button type="button" class="btn-key-shift py-1.5 rounded-lg text-xs font-bold bg-slate-800 text-slate-300 hover:bg-slate-700 transition" data-shift="3">+3</button>
+          </div>
+
+          <!-- シフト後の情報表示 -->
+          <div class="p-2.5 bg-slate-900/90 rounded-xl border border-white/5 space-y-1.5 text-xs">
+            <div class="flex justify-between items-center">
+              <span class="text-slate-400 text-[11px]">変更後の最高音:</span>
+              <div class="flex items-center gap-1.5">
+                <span id="key-shift-highest-note" class="font-extrabold text-purple-300">--</span>
+                <button id="btn-play-shifted-tone" type="button" class="px-2 py-0.5 bg-purple-500/20 hover:bg-purple-500/40 text-purple-300 rounded-md text-[10px] font-bold flex items-center gap-1 transition">
+                  <i data-lucide="volume-2" class="w-3 h-3"></i>
+                  <span>聴く</span>
+                </button>
+              </div>
+            </div>
+            <div id="key-shift-status-pill" class="text-[11px] font-semibold text-emerald-400 flex items-center gap-1">
+              <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i>
+              <span>判定中...</span>
+            </div>
+          </div>
+        </div>
+
         <!-- 相性判定の理由 -->
         <div class="p-3.5 bg-purple-950/20 border border-purple-500/20 rounded-2xl">
           <span class="text-[11px] font-bold text-purple-300 block mb-1">あなたとの相性分析</span>
@@ -780,6 +876,54 @@
       </div>
     </div>
 
+    <!-- ================= 音域診断結果SNSシェアモーダル ================= -->
+    <div id="modal-share-card" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm hidden items-center justify-center p-4">
+      <div class="glass-panel w-full max-w-sm rounded-3xl p-5 border border-slate-700/80 space-y-3.5 max-h-[95vh] overflow-y-auto">
+        <div class="flex items-center justify-between border-b border-surface-border pb-2.5">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-lg bg-gradient-to-tr from-purple-600 to-cyan-400 flex items-center justify-center">
+              <i data-lucide="sparkles" class="w-3.5 h-3.5 text-white"></i>
+            </div>
+            <h3 class="text-xs font-bold text-white">音域診断カードの作成</h3>
+          </div>
+          <button id="btn-close-share-modal" class="text-slate-400 hover:text-white p-1">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- 診断カードプレビュー（Canvas） -->
+        <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-purple-500/30 bg-slate-950 flex items-center justify-center">
+          <canvas id="share-card-canvas" width="800" height="960" class="w-full h-auto rounded-2xl"></canvas>
+        </div>
+
+        <p class="text-[10px] text-slate-400 text-center leading-tight">
+          ※SNS（Xやnote・インスタ）に投稿して、歌仲間と音域をシェアしよう！
+        </p>
+
+        <!-- アクションボタン一覧 -->
+        <div class="space-y-2 pt-1">
+          <button id="btn-share-to-x"
+            class="w-full py-2.5 bg-[#0f1419] hover:bg-black text-white font-bold rounded-xl text-xs flex items-center justify-center gap-2 border border-slate-700 shadow-md active:scale-95 transition">
+            <svg class="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            <span>X (旧Twitter) でポストする</span>
+          </button>
+
+          <div class="grid grid-cols-2 gap-2">
+            <button id="btn-download-share-card"
+              class="py-2.5 px-3 bg-gradient-music hover:brightness-110 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>画像を保存</span>
+            </button>
+            <button id="btn-native-share-card"
+              class="py-2.5 px-3 bg-surface-card hover:bg-slate-800 text-slate-200 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 border border-surface-border active:scale-95 transition">
+              <i data-lucide="share" class="w-3.5 h-3.5 text-cyan-400"></i>
+              <span>スマホ共有</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ================= スマホで開く（QRコード）モーダル ================= -->
     <div id="modal-qr" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4">
       <div class="glass-panel w-full max-w-sm rounded-3xl p-6 border border-slate-700/80 space-y-4 text-center">
@@ -824,7 +968,7 @@
 
   </div>
 
-  <script src="js/app.js?v=7"></script>
+  <script src="js/app.js?v=8"></script>
 </body>
 
 </html>

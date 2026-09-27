@@ -100,3 +100,44 @@ section[id^="view-"] {
 .animate-pulse-slow {
   animation: pulseSlow 3s infinite ease-in-out;
 }
+
+/* ピアノ基準音キー */
+.piano-key-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  height: 60px;
+  border-radius: 12px;
+  transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  touch-action: manipulation;
+}
+
+.piano-key-btn:active,
+.piano-key-btn.playing {
+  transform: translateY(2px) scale(0.96);
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.6) !important;
+  border-color: #38bdf8 !important;
+}
+
+/* 白鍵スタイル */
+.piano-key-white {
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #f8fafc;
+}
+
+/* 黒鍵スタイル */
+.piano-key-black {
+  background: #0f172a;
+  border: 1px solid #475569;
+  color: #a78bfa;
+}
+
+/* キーハイライト */
+.piano-key-highlight {
+  border-color: rgba(168, 85, 247, 0.6) !important;
+  background: linear-gradient(180deg, #1e1b4b 0%, #1e293b 100%);
+}
