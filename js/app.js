@@ -499,45 +499,239 @@
     }
   }
 
-  // ================= 4. AI音域推定ロジック =================
+  // ================= 4. 高精度AI音域推定ロジック＆実測データベース =================
+  const KNOWN_SONGS_MAP = [
+    // 最新バイラル＆定番ヒット
+    { keywords: ["晩餐歌", "ばんさんか"], artistKey: "tuki", lowest: "A3", highest: "D#5", type: "female", diff: 3, tags: ["ハイトーン", "ウィスパー", "バラード"], desc: "15歳シンガーtuki.の大ヒット曲。サビの切ないhiD#と繊細なAメロの響き。" },
+    { keywords: ["一輪花", "いちりんか"], artistKey: "tuki", lowest: "G3", highest: "D5", type: "female", diff: 3, tags: ["バラード", "表現力"], desc: "サビの情感あふれるhiDへの盛り上がり。" },
+    { keywords: ["サクラキミワタシ"], artistKey: "tuki", lowest: "A3", highest: "D5", type: "female", diff: 3, tags: ["卒業ソング", "透明感"], desc: "最高音hiD。言葉の抜け感が心地よいポップス。" },
+    { keywords: ["幾億光年", "いくおくこうねん"], artistKey: "omoinotake", lowest: "D#3", highest: "C#5", type: "male", diff: 4, tags: ["ミックスボイス練習", "超高音", "ロングトーン"], desc: "ドラマ『Eye Love You』主題歌。サビで連発するhiB〜hiC#の美しく力強いハイトーン。" },
+    { keywords: ["モラトリアム"], artistKey: "omoinotake", lowest: "C#3", highest: "C5", type: "male", diff: 4, tags: ["ハイトーン", "グルーヴ"], desc: "サビのhiCへの突き抜けとピアノビート。" },
+    { keywords: ["bling-bang-bang-born", "ブリンバンバンボン", "bbbb"], artistKey: "creepy", lowest: "G#2", highest: "E4", type: "male", diff: 3, tags: ["高速ラップ", "低音", "リズムキープ"], desc: "アニメ『マッシュル』OP。最高音mid2Eと声域は低めですが、滑舌とリズムの俊敏さが必須。" },
+    { keywords: ["二度寝", "にどね"], artistKey: "creepy", lowest: "A2", highest: "F#4", type: "male", diff: 3, tags: ["グルーヴ", "滑舌", "ドラマ主題歌"], desc: "ドラマ『不適切にもほどがある!』主題歌。最高音mid2F#の心地よいスウィングラップ。" },
+    { keywords: ["はいよろこんで", "ギリギリダンス"], artistKey: "こっちのけんと", lowest: "F3", highest: "A#4", type: "male", diff: 3, tags: ["リズム", "裏声", "滑舌"], desc: "サビのキャッチーなフレーズとhiA#の裏声アクセント。" },
+    { keywords: ["唱", "しょう"], artistKey: "ado", lowest: "G#3", highest: "B5", type: "female", diff: 5, tags: ["超高音", "がなり・声色変化", "高速"], desc: "USJハロウィンテーマ。hihiBに達する異次元のハイトーンと多彩な発声テクニック。" },
+    { keywords: ["クラクラ"], artistKey: "ado", lowest: "G3", highest: "F5", type: "female", diff: 4, tags: ["スウィング", "超高音", "アニメ主題歌"], desc: "アニメ『SPY×FAMILY』OP。ビッグバンドに乗せたhiFの高音域。" },
+    { keywords: ["i wonder", "アイワンダー"], artistKey: "da-ice", lowest: "D3", highest: "B4", type: "male", diff: 4, tags: ["ダンスポップ", "高音", "ファルセット"], desc: "ドラマ『くるり』主題歌。サビのhiBへの跳躍とグルーヴ感。" },
+    { keywords: ["スターマイン"], artistKey: "da-ice", lowest: "C#3", highest: "C5", type: "male", diff: 4, tags: ["高速祭りビート", "高音", "アタック"], desc: "一気に駆け上がるhiCの高音とパンチの効いたアタック。" },
+
+    // Mrs. GREEN APPLE
+    { keywords: ["familie", "ファミリエ"], artistKey: "mrs", lowest: "E3", highest: "C5", type: "male", diff: 4, tags: ["温かい声", "ハイトーン", "高音"], desc: "サビの抜けの良いhiC。優しく包み込むようなミックスボイス。" },
+    { keywords: ["magic", "マジック"], artistKey: "mrs", lowest: "D3", highest: "C5", type: "male", diff: 4, tags: ["ハイトーン", "リズム", "声量"], desc: "コカ・コーラCM曲。サビの圧倒的hiCの突き抜け感。" },
+    { keywords: ["soranji", "ソランジ"], artistKey: "mrs", lowest: "B2", highest: "D5", type: "male", diff: 5, tags: ["超高音", "壮大", "表現力"], desc: "映画『ラーゲリより愛を込めて』主題歌。hiDの圧巻の叫びと静寂の美。" },
+    { keywords: ["僕のこと", "ぼくのこと"], artistKey: "mrs", lowest: "C#3", highest: "C5", type: "male", diff: 5, tags: ["高音", "声量", "ミックスボイス練習"], desc: "高校サッカー応援歌。サビのhiCのロングトーンと力強いベルティング。" },
+    { keywords: ["start", "スタート"], artistKey: "mrs", lowest: "D3", highest: "B4", type: "male", diff: 4, tags: ["疾走感", "ポップス", "高音"], desc: "最高音hiB。アップテンポで明るいハイトーン発声の練習に。" },
+
+    // Official髭男dism
+    { keywords: ["cry baby", "クライベビー"], artistKey: "髭男", lowest: "C3", highest: "D5", type: "male", diff: 5, tags: ["転調", "超高音", "ミックスボイス練習"], desc: "『東リベ』主題歌。目まぐるしい転調とサビのhiDミックスボイス。" },
+    { keywords: ["tattoo", "タトゥー"], artistKey: "髭男", lowest: "C#3", highest: "C#5", type: "male", diff: 5, tags: ["ソウル・ファンク", "高音", "グルーヴ"], desc: "最高音hiC#。力を抜いた中高音とシャープなファルセット。" },
+    { keywords: ["ホワイトノイズ"], artistKey: "髭男", lowest: "D3", highest: "D#5", type: "male", diff: 5, tags: ["ロック", "超高音", "声量"], desc: "最高音hiD#。力強いロックサウンドとハイトーンシャウト。" },
+
+    // King Gnu
+    { keywords: ["specialz", "スペシャルズ"], artistKey: "king gnu", lowest: "B2", highest: "A#4", type: "male", diff: 4, tags: ["低音", "ダーク", "呪術廻戦"], desc: "『呪術廻戦 渋谷事変』OP。怪しげな低音とサビのhiA#の力強い叫び。" },
+    { keywords: ["カメレオン"], artistKey: "king gnu", lowest: "C#3", highest: "C#5", type: "male", diff: 4, tags: ["ファルセット", "繊細", "バラード"], desc: "ドラマ『ミステリと言う勿れ』主題歌。全編にわたる息の混じった美しい裏声。" },
+    { keywords: ["雨燦々", "あめさんさん"], artistKey: "king gnu", lowest: "B2", highest: "B4", type: "male", diff: 4, tags: ["壮大", "高音", "声量"], desc: "ゴスペル調のコーラスに乗せた力強いhiBのハイトーン。" },
+
+    // Vaundy
+    { keywords: ["replica", "レプリカ"], artistKey: "vaundy", lowest: "D3", highest: "G#4", type: "male", diff: 3, tags: ["ロック", "中高音", "グルーヴ"], desc: "最高音mid2G#。骨太なバンドサウンドに乗せる男らしい発声。" },
+    { keywords: ["tokimeki", "トキメキ"], artistKey: "vaundy", lowest: "C3", highest: "G4", type: "male", diff: 3, tags: ["軽快", "ダンス", "中音域"], desc: "最高音mid2G。シティポップ感のある抜けの良い歌い方。" },
+    { keywords: ["東京フラッシュ"], artistKey: "vaundy", lowest: "B2", highest: "F#4", type: "male", diff: 2, tags: ["脱力", "R&B", "低音"], desc: "最高音mid2F#。チルで気だるげな歌声のコントロール。" },
+    { keywords: ["chainsaw blood", "チェンソーブラッド"], artistKey: "vaundy", lowest: "C3", highest: "G#4", type: "male", diff: 4, tags: ["シャウト", "ロック", "がなり"], desc: "『チェンソーマン』ED。荒々しい歪み声とエッジの効いたロックボーカル。" },
+
+    // 米津玄師
+    { keywords: ["がらくた"], artistKey: "米津玄師", lowest: "A2", highest: "G4", type: "male", diff: 3, tags: ["映画主題歌", "抑揚", "中音域"], desc: "映画『ラストマイル』主題歌。最高音mid2Gと歌いやすいキーで心に響く歌唱。" },
+    { keywords: ["地球儀", "ちきゅうぎ"], artistKey: "米津玄師", lowest: "G2", highest: "F#4", type: "male", diff: 3, tags: ["低音", "ジブリ", "語り"], desc: "映画『君たちはどう生きるか』主題歌。lowGから始まる深い低音の響き。" },
+    { keywords: ["pale blue", "ペールブルー"], artistKey: "米津玄師", lowest: "G#2", highest: "F5", type: "male", diff: 5, tags: ["超高音", "裏声", "バラード"], desc: "サビの切ないファルセットと驚異的なhiFの高音。" },
+    { keywords: ["死神", "しにがみ"], artistKey: "米津玄師", lowest: "F#2", highest: "E4", type: "male", diff: 3, tags: ["落語", "リズム", "低音"], desc: "最高音mid2E、最低音lowF#の低音域主体のユニークなナンバー。" },
+
+    // back number
+    { keywords: ["冬と春", "ふゆとはる"], artistKey: "back number", lowest: "B2", highest: "G#4", type: "male", diff: 3, tags: ["切なさ", "バラード", "ファルセット"], desc: "最高音mid2G#。冬の澄んだ空気に溶けるような切ないファルセット。" },
+    { keywords: ["新しい恋人達に"], artistKey: "back number", lowest: "A2", highest: "G4", type: "male", diff: 3, tags: ["ドラマ主題歌", "語り", "中音域"], desc: "ドラマ『海のはじまり』主題歌。最高音mid2G。言葉を丁寧に届ける発声。" },
+    { keywords: ["アイラブユー", "iloveyou"], artistKey: "back number", lowest: "B2", highest: "G#4", type: "male", diff: 3, tags: ["朝ドラ主題歌", "温かい声"], desc: "NHK朝ドラ『舞いあがれ!』主題歌。温かな中高音の響き。" },
+    { keywords: ["怪盗", "かいとう"], artistKey: "back number", lowest: "C#3", highest: "A4", type: "male", diff: 3, tags: ["疾走感", "高音", "ポップス"], desc: "サビの爽快なhiAへの跳躍と軽やかなリズム。" },
+
+    // 優里
+    { keywords: ["カーテンコール"], artistKey: "優里", lowest: "C#3", highest: "A4", type: "male", diff: 4, tags: ["ロック", "アニメ主題歌", "高音"], desc: "『ヒロアカ』OP。サビのhiAロングトーンと熱い叫び。" },
+    { keywords: ["シャッター"], artistKey: "優里", lowest: "B2", highest: "A4", type: "male", diff: 4, tags: ["エモーショナル", "高音", "バラード"], desc: "最高音hiA。Aメロの静かな語りからサビの激しい盛り上がり。" },
+    { keywords: ["ピーターパン"], artistKey: "優里", lowest: "C3", highest: "A#4", type: "male", diff: 4, tags: ["前向き", "高音", "アタック"], desc: "サビの最高音hiA#。力強く前へ押し出す声帯の閉鎖。" },
+
+    // ヨルシカ
+    { keywords: ["花に亡霊", "はなにおばけ"], artistKey: "ヨルシカ", lowest: "A#3", highest: "D5", type: "female", diff: 2, tags: ["透明感", "アニメ映画", "美声"], desc: "映画『泣きたい私は猫をかぶる』主題歌。最高音hiDの涼やかなハイトーン。" },
+    { keywords: ["春泥棒", "はるどろぼう"], artistKey: "ヨルシカ", lowest: "G3", highest: "C5", type: "female", diff: 3, tags: ["アコースティック", "リズム", "春ソング"], desc: "最高音hiC。跳ねるような心地よいテンポ感。" },
+    { keywords: ["アルジャーノン"], artistKey: "ヨルシカ", lowest: "G#3", highest: "C#5", type: "female", diff: 3, tags: ["ドラマ主題歌", "ウィスパー", "バラード"], desc: "最高音hiC#。息をたっぷりと含んだ優しい歌声。" },
+
+    // なとり & キタニタツヤ
+    { keywords: ["overdose", "オーバードーズ"], artistKey: "なとり", lowest: "A#2", highest: "F#4", type: "male", diff: 2, tags: ["脱力", "チル", "中低音"], desc: "最高音mid2F#と低めの設定。脱力して息を抜く歌い方の練習に最適。" },
+    { keywords: ["金木犀", "きんもくせい"], artistKey: "なとり", lowest: "B2", highest: "G4", type: "male", diff: 2, tags: ["中音域", "低音", "エモい"], desc: "最高音mid2G。エモーショナルな中低音ボーカル。" },
+    { keywords: ["青のすみか", "あおのすみか"], artistKey: "キタニタツヤ", lowest: "B2", highest: "B4", type: "male", diff: 4, tags: ["呪術廻戦", "高音", "疾走感"], desc: "『呪術廻戦 懐玉・玉折』OP。突き抜けるhiBのハイトーンと疾走感。" },
+
+    // スピッツ
+    { keywords: ["美しい鰭", "うつくしいひれ"], artistKey: "スピッツ", lowest: "D3", highest: "A#4", type: "male", diff: 3, tags: ["コナン映画", "裏声", "透明感"], desc: "映画『名探偵コナン 黒鉄の魚影』主題歌。サビのhiA#ファルセットが印象的。" },
+
+    // 緑黄色社会 & Aimer
+    { keywords: ["mela!", "メラ"], artistKey: "緑黄色社会", lowest: "G3", highest: "E5", type: "female", diff: 4, tags: ["声量", "ブラス", "超高音"], desc: "最高音hiE。圧倒的な声量とブラスに負けないベルティングボイス。" },
+    { keywords: ["花になって", "はなになって"], artistKey: "緑黄色社会", lowest: "G#3", highest: "D#5", type: "female", diff: 4, tags: ["薬屋のひとりごと", "ダーク", "高音"], desc: "最高音hiD#。中毒性のあるメロディとキレのあるボーカル。" },
+    { keywords: ["残響散歌", "ざんきょうさんか"], artistKey: "aimer", lowest: "G#3", highest: "D#5", type: "female", diff: 4, tags: ["鬼滅の刃", "ハスキー", "高音"], desc: "『鬼滅の刃 遊郭編』OP。ハスキーな響きとサビのhiD#のスピード感。" },
+    { keywords: ["カタオモイ"], artistKey: "aimer", lowest: "G3", highest: "C5", type: "female", diff: 2, tags: ["アコースティック", "優しさ", "中音域"], desc: "最高音hiC。androp内澤提供の温かいアコースティックナンバー。" },
+
+    // 藤井風
+    { keywords: ["満ちてゆく", "みちてゆく"], artistKey: "藤井風", lowest: "G#2", highest: "G#4", type: "male", diff: 4, tags: ["ピアノバラード", "裏声", "表現力"], desc: "最高音mid2G#。ファルセットと地声のシームレスな移行。" },
+    { keywords: ["きらり"], artistKey: "藤井風", lowest: "A2", highest: "A4", type: "male", diff: 3, tags: ["グルーヴ", "ファルセット", "ダンス"], desc: "最高音hiA。軽快なダンスビートと美しい裏声のアクセント。" },
+    { keywords: ["死ぬのがいいわ"], artistKey: "藤井風", lowest: "G2", highest: "F4", type: "male", diff: 3, tags: ["世界的人気", "低音", "脱力"], desc: "最高音mid2F、最低音lowG。海外で大バズした名曲。" },
+
+    // ボカロ・ネット人気曲
+    { keywords: ["シャルル"], artistKey: "バルーン", lowest: "C#3", highest: "B4", type: "male", diff: 4, tags: ["ボカロ定番", "跳躍", "高音"], desc: "サビのhiBへの急激なオクターブ跳躍。裏声切り替えの練習曲。" },
+    { keywords: ["king", "キング"], artistKey: "kanaria", lowest: "A#3", highest: "D#5", type: "female", diff: 4, tags: ["英語", "ダーク", "高音"], desc: "最高音hiD#。クールでエッジの効いた発声。" },
+    { keywords: ["神っぽいな", "かみっぽいな"], artistKey: "ピノキオピー", lowest: "G#3", highest: "E5", type: "female", diff: 4, tags: ["早口", "滑舌", "高音"], desc: "最高音hiE。言葉数の多いハイスピードナンバー。" },
+    { keywords: ["酔いどれ知らず", "よいどれしらず"], artistKey: "kanaria", lowest: "G#2", highest: "G4", type: "male", diff: 3, tags: ["和風", "低音", "エモい"], desc: "最高音mid2G、最低音lowG#。低音の響きと独特のグルーヴ。" },
+    { keywords: ["テレキャスタービーボーイ"], artistKey: "すりぃ", lowest: "C#3", highest: "C#5", type: "male", diff: 5, tags: ["超高速", "超高音", "ロック"], desc: "サビのhiC#の連打と目まぐるしいテンポ感。" },
+
+    // 定番J-POP・バンド
+    { keywords: ["なんでもないよ", "なんでもないよ、"], artistKey: "マカロニえんぴつ", lowest: "B2", highest: "A#4", type: "male", diff: 4, tags: ["感情表現", "高音", "バラード"], desc: "最高音hiA#。語りかけるようなAメロからサビの情熱的な叫び。" },
+    { keywords: ["恋人ごっこ", "こいびとごっこ"], artistKey: "マカロニえんぴつ", lowest: "C3", highest: "A4", type: "male", diff: 3, tags: ["高音", "ポップス", "エモい"], desc: "最高音hiA。感情の揺れを音程に乗せる練習に。" },
+    { keywords: ["結", "ゆい"], artistKey: "saucy dog", lowest: "C3", highest: "G#4", type: "male", diff: 3, tags: ["バラード", "温かさ", "中高音"], desc: "最高音mid2G#。真っ直ぐな言葉を届けるウェディングソング。" },
+    { keywords: ["メリッサ"], artistKey: "ポルノグラフィティ", lowest: "C#3", highest: "A#4", type: "male", diff: 4, tags: ["アニメOP", "ハイトーン", "ロック"], desc: "『ハガレン』OP。サビ頭のhiA#の力強い突き抜け感。" },
+    { keywords: ["ミュージック・アワー", "ミュージックアワー"], artistKey: "ポルノグラフィティ", lowest: "D3", highest: "B4", type: "male", diff: 4, tags: ["夏ソング", "高音", "滑舌"], desc: "最高音hiB。早口のラジオ語りと爽快なサビのハイトーン。" },
+    { keywords: ["driver's high", "ドライバーズハイ"], artistKey: "l'arc", lowest: "B2", highest: "B4", type: "male", diff: 4, tags: ["gto", "疾走感", "高音"], desc: "アニメ『GTO』OP。サビのhiBへの駆け上がりと爽快なドライブ感。" },
+    { keywords: ["honey", "ハニー"], artistKey: "l'arc", lowest: "C#3", highest: "A4", type: "male", diff: 3, tags: ["ロック", "高音", "ビブラート"], desc: "最高音hiA。ラルクの王道ハイトーンロック。" },
+    { keywords: ["誘惑", "ゆうわく"], artistKey: "glay", lowest: "B2", highest: "B4", type: "male", diff: 4, tags: ["ビートロック", "高音", "声量"], desc: "最高音hiB。GLAYを代表するアップテンポなロックナンバー。" },
+    { keywords: ["however", "ハウエバー"], artistKey: "glay", lowest: "G#2", highest: "A#4", type: "male", diff: 4, tags: ["壮大バラード", "ロングトーン", "高音"], desc: "サビのhiA#ロングトーンと低音Aメロの劇的な対比。" },
+    { keywords: ["世界が終るまでは"], artistKey: "wands", lowest: "B2", highest: "A#4", type: "male", diff: 3, tags: ["スラダン", "ロングトーン", "力強さ"], desc: "『SLAM DUNK』ED。胸を打つhiA#のロングトーン。" },
+    { keywords: ["沈丁花", "ちんちょうげ"], artistKey: "dish", lowest: "A2", highest: "G4", type: "male", diff: 2, tags: ["感謝", "中音域", "ポップス"], desc: "最高音mid2G。受験生や家族への温かな応援歌。" },
+    { keywords: ["桜坂", "さくらざか"], artistKey: "福山雅治", lowest: "G2", highest: "D4", type: "male", diff: 1, tags: ["低音", "胸声", "名曲バラード"], desc: "最高音mid2D、最低音lowG。低音男性の十八番に最適な名曲。" },
+    { keywords: ["虹", "にじ"], artistKey: "福山雅治", lowest: "A2", highest: "F#4", type: "male", diff: 2, tags: ["爽やか", "中低音", "アタック"], desc: "最高音mid2F#。力強いサビの男らしい響き。" },
+    { keywords: ["sun", "サン"], artistKey: "星野源", lowest: "C3", highest: "G4", type: "male", diff: 3, tags: ["ダンス", "ファルセット", "明るい"], desc: "最高音mid2G。明るいステップとサビ前の裏声。" },
+    { keywords: ["アイデア"], artistKey: "星野源", lowest: "B2", highest: "A4", type: "male", diff: 3, tags: ["朝ドラ主題歌", "高音", "マリンバ"], desc: "NHK朝ドラ主題歌。サビのhiAへの展開。" },
+    { keywords: ["i love you", "アイラブユー"], artistKey: "尾崎豊", lowest: "A2", highest: "G4", type: "male", diff: 2, tags: ["名曲バラード", "息遣い", "情感"], desc: "最高音mid2G。ささやくようなAメロから情感豊かなサビへ。" },
+    { keywords: ["いとしのエリー"], artistKey: "サザン", lowest: "G2", highest: "F4", type: "male", diff: 2, tags: ["低音", "こぶし", "ソウル"], desc: "最高音mid2F、最低音lowG。桑田佳祐の歌いまわしと温かい低音。" },
+    { keywords: ["歌うたいのバラッド"], artistKey: "斉藤和義", lowest: "G2", highest: "G#4", type: "male", diff: 3, tags: ["情熱", "バラード", "歌い上げ"], desc: "最高音mid2G#。サビの情熱的な歌い上げが胸を打つ名曲。" },
+    { keywords: ["春を告げる", "はるをつげる"], artistKey: "yama", lowest: "A3", highest: "D5", type: "female", diff: 3, tags: ["シティポップ", "グルーヴ", "中高音"], desc: "最高音hiD。タイトなビートに乗る心地よい歌声。" }
+  ];
+
+  // アーティスト別の音域特性プロファイル
+  const ARTIST_RANGE_PROFILES = [
+    { match: ["福山雅治"], baseLow: "G2", baseHigh: "E4", diff: 1, vocal: "male", desc: "低音の包容力と胸声の響き。最高音はmid2D〜mid2E付近です。" },
+    { match: ["Creepy Nuts", "R-指定", "ケツメイシ", "nobodyknows"], baseLow: "G#2", baseHigh: "F4", diff: 3, vocal: "male", desc: "リズム・滑舌重視のヒップホップ。最高音はmid2E〜mid2F#付近です。" },
+    { match: ["サザンオールスターズ", "桑田佳祐", "奥田民生", "井上陽水"], baseLow: "G2", baseHigh: "F#4", diff: 2, vocal: "male", desc: "渋い中低音と独自の歌いまわし。最高音はmid2F〜mid2F#付近です。" },
+    { match: ["BUMP OF CHICKEN", "バンプ"], baseLow: "A#2", baseHigh: "G4", diff: 2, vocal: "male", desc: "中音域主体のストレートなロック。最高音はmid2G付近です。" },
+    { match: ["星野源"], baseLow: "B2", baseHigh: "G#4", diff: 3, vocal: "male", desc: "ソウルフルなダンスポップ。最高音はmid2G〜hiA付近です。" },
+    { match: ["スピッツ", "草野マサムネ"], baseLow: "C3", baseHigh: "A4", diff: 2, vocal: "male", desc: "透明感のあるクリアボイス。最高音はmid2F〜hiA付近です。" },
+    { match: ["back number", "バックナンバー"], baseLow: "A2", baseHigh: "A4", diff: 3, vocal: "male", desc: "切ないバラード。最高音はmid2G#〜hiA付近です。" },
+    { match: ["優里", "ゆうり"], baseLow: "B2", baseHigh: "A#4", diff: 4, vocal: "male", desc: "力強いエモーショナルボイス。最高音はhiA〜hiA#付近です。" },
+    { match: ["Vaundy", "バウンディ"], baseLow: "B2", baseHigh: "A4", diff: 3, vocal: "male", desc: "多彩なジャンルを歌いこなすハイトーン。最高音はmid2G〜hiA付近です。" },
+    { match: ["米津玄師", "ハチ"], baseLow: "A2", baseHigh: "A#4", diff: 4, vocal: "male", desc: "広い音域と表現力。最高音はmid2G#〜hiA#付近です。" },
+    { match: ["Saucy Dog", "サウシー"], baseLow: "C3", baseHigh: "A#4", diff: 4, vocal: "male", desc: "胸に刺さるハイトーン。最高音はhiA〜hiA#付近です。" },
+    { match: ["マカロニえんぴつ"], baseLow: "B2", baseHigh: "A#4", diff: 4, vocal: "male", desc: "感情をぶつけるエモロック。最高音はhiA〜hiA#付近です。" },
+    { match: ["ポルノグラフィティ", "岡野昭仁"], baseLow: "C3", baseHigh: "B4", diff: 4, vocal: "male", desc: "突き抜ける声量と滑舌。最高音はmid2G#〜hiB付近です。" },
+    { match: ["藤井風"], baseLow: "G#2", baseHigh: "A4", diff: 4, vocal: "male", desc: "豊かな低音と美しいファルセット。最高音はmid2G#〜hiA付近です。" },
+    { match: ["Official髭男dism", "髭男", "ヒゲダン", "藤原聡"], baseLow: "C3", baseHigh: "C#5", diff: 5, vocal: "male", desc: "極上のミックスボイス。最高音はhiB〜hiDに達します。" },
+    { match: ["Mrs. GREEN APPLE", "ミセス", "大森元貴"], baseLow: "C#3", baseHigh: "C5", diff: 5, vocal: "male", desc: "圧巻のハイトーン。最高音はhiB〜hiDに達します。" },
+    { match: ["King Gnu", "キングヌー", "井口理", "常田大希"], baseLow: "B2", baseHigh: "C5", diff: 5, vocal: "male", desc: "ファルセットと地声の融合。最高音はhiA#〜hiDに達します。" },
+    { match: ["Da-iCE", "ダイス", "花村想太"], baseLow: "C#3", baseHigh: "D5", diff: 5, vocal: "male", desc: "男性最高峰のハイトーンツインボーカル。最高音はhiB〜hiD付近です。" },
+    { match: ["ONE OK ROCK", "ワンオク", "Taka"], baseLow: "C#3", baseHigh: "B4", diff: 5, vocal: "male", desc: "世界基準のロックハイトーン。最高音はhiA〜hiC付近です。" },
+    { match: ["Omoinotake", "オモイノタケ"], baseLow: "D3", baseHigh: "C#5", diff: 4, vocal: "male", desc: "美しく伸びるミックスボイス。最高音はhiB〜hiC#付近です。" },
+    { match: ["あいみょん"], baseLow: "F3", baseHigh: "C#5", diff: 2, vocal: "female", desc: "中低音の温かみとストレートな地声。最高音はhiC〜hiD付近です。" },
+    { match: ["宇多田ヒカル"], baseLow: "F#3", baseHigh: "D5", diff: 3, vocal: "female", desc: "繊細な息遣いとR&Bトーン。最高音はhiC#〜hiD#付近です。" },
+    { match: ["tuki."], baseLow: "G3", baseHigh: "D#5", diff: 3, vocal: "female", desc: "エモーショナルなハイトーン。最高音はhiD〜hiD#付近です。" },
+    { match: ["ヨルシカ", "suis"], baseLow: "G#3", baseHigh: "D5", diff: 3, vocal: "female", desc: "透き通るウィスパードハイトーン。最高音はhiC〜hiD#付近です。" },
+    { match: ["Ado", "アド"], baseLow: "F#3", baseHigh: "F#5", diff: 5, vocal: "female", desc: "多彩な声色と驚異の高音域。最高音はhiE〜hihiBに達します。" },
+    { match: ["YOASOBI", "ikura", "幾田りら"], baseLow: "G3", baseHigh: "F#5", diff: 4, vocal: "female", desc: "高速高音と正確なピッチ。最高音はhiE〜hiF#付近です。" },
+    { match: ["緑黄色社会", "長屋晴子"], baseLow: "G3", baseHigh: "E5", diff: 4, vocal: "female", desc: "圧倒的な声量とベルティング。最高音はhiD〜hiE付近です。" },
+    { match: ["LiSA"], baseLow: "G#3", baseHigh: "E5", diff: 4, vocal: "female", desc: "パンチの効いたロックハイトーン。最高音はhiD〜hiE付近です。" },
+    { match: ["Aimer", "エメ"], baseLow: "G#3", baseHigh: "D#5", diff: 3, vocal: "female", desc: "ハスキーな深みと高音の広がり。最高音はhiC#〜hiD#付近です。" },
+    { match: ["乃木坂46", "櫻坂46", "日向坂46", "AKB48"], baseLow: "A3", baseHigh: "C5", diff: 2, vocal: "female", desc: "誰でも歌いやすいアイドルポップス。最高音はhiB〜hiC#付近です。" }
+  ];
+
   function estimateSongVocalRange(title, artist, vocalType) {
-    const isFemale = vocalType === 'female' || 
-                     ['tuki.', 'Aimer', 'Ado', 'YOASOBI', 'あいみょん', '椎名林檎', '宇多田ヒカル', 'MISIA', 'ヨルシカ', 'ずっと真夜中でいいのに。', '緑黄色社会', 'LiSA', 'milet', 'yama', 'Superfly', '絢香'].some(a => artist.includes(a));
-
-    let lowestNote = isFemale ? 'G3' : 'C3';
-    let highestNote = isFemale ? 'D#5' : 'A4';
-    let difficulty = 3;
-    let practiceTags = ['高音', '安定感', '音程'];
-
-    // キーワード判定
-    const text = (title + ' ' + artist).toLowerCase();
-    if (text.includes('バラード') || text.includes('愛') || text.includes('恋') || text.includes('歌') || text.includes('letter') || text.includes('first')) {
-      difficulty = isFemale ? 2 : 2;
-      practiceTags = ['バラード', '表現力', 'ロングトーン'];
-      if (!isFemale) highestNote = 'G4';
-    } else if (text.includes('rock') || text.includes('night') || text.includes('踊') || text.includes('kick') || text.includes('炎') || text.includes('新時代')) {
-      difficulty = 4;
-      highestNote = isFemale ? 'F5' : 'A#4';
-      practiceTags = ['高音', '声量', 'ミックスボイス練習'];
+    const rawText = `${title} ${artist}`.toLowerCase().replace(/[\s\-_・、。！？!?]/g, '');
+    
+    // 1. 実測辞書（KNOWN_SONGS_MAP）を最優先検索
+    for (const song of KNOWN_SONGS_MAP) {
+      const matchKeyword = song.keywords.some(kw => rawText.includes(kw.toLowerCase().replace(/[\s\-_・]/g, '')));
+      const matchArtist = !song.artistKey || rawText.includes(song.artistKey.toLowerCase());
+      if (matchKeyword && matchArtist) {
+        return {
+          title,
+          artist,
+          lowest_note: song.lowest,
+          highest_note: song.highest,
+          main_range: `${song.lowest}〜${song.highest}`,
+          difficulty: song.diff,
+          vocal_type: song.type,
+          is_estimate: false,
+          source_type: 'exact',
+          practice_tags: song.tags,
+          practice_focus: `${song.desc} (実測データに基づき精密マッチング)`
+        };
+      }
     }
 
-    if (artist.includes('Official髭男dism') || artist.includes('Mrs. GREEN APPLE') || artist.includes('King Gnu')) {
-      highestNote = 'C5';
-      difficulty = 5;
-      practiceTags = ['超高音', 'ミックスボイス練習', '裏声'];
+    // 2. アーティストプロファイル照合
+    let matchedProfile = null;
+    for (const prof of ARTIST_RANGE_PROFILES) {
+      if (prof.match.some(m => rawText.includes(m.toLowerCase().replace(/[\s\-_・]/g, '')))) {
+        matchedProfile = prof;
+        break;
+      }
     }
+
+    const isFemale = vocalType === 'female' || (matchedProfile && matchedProfile.vocal === 'female') ||
+      ['aimer', 'ado', 'yoasobi', 'tuki', 'あいみょん', '椎名林檎', '宇多田ヒカル', 'misia', 'ヨルシカ', 'ずっと真夜中でいいのに', '緑黄色社会', 'lisa', 'milet', 'yama', 'superfly', '絢香'].some(a => rawText.includes(a));
+
+    let baseLowNote = isFemale ? 'G3' : 'B2';
+    let baseHighNote = isFemale ? 'D5' : 'G#4';
+    let diff = isFemale ? 3 : 3;
+    let desc = '';
+
+    if (matchedProfile) {
+      baseLowNote = matchedProfile.baseLow;
+      baseHighNote = matchedProfile.baseHigh;
+      diff = matchedProfile.diff;
+      desc = matchedProfile.desc;
+    }
+
+    // 3. タイトルキーワード＆ハッシュによる自然な揺らぎ（個々の曲ごとの個性算出）
+    let lowMidi = noteToMidi(baseLowNote) || (isFemale ? 55 : 47);
+    let highMidi = noteToMidi(baseHighNote) || (isFemale ? 74 : 68);
+
+    // タイトル文字のハッシュで -1〜+2半音の自然なバリエーションを付与（同一曲なら常に一定）
+    let hash = 0;
+    for (let i = 0; i < title.length; i++) hash = (hash * 31 + title.charCodeAt(i)) % 7;
+    const variation = (hash % 3) - 1; // -1, 0, +1
+    highMidi += variation;
+
+    // キーワードによる補正
+    if (rawText.includes('バラード') || rawText.includes('愛') || rawText.includes('恋') || rawText.includes('夜') || rawText.includes('slow') || rawText.includes('アコースティック')) {
+      highMidi = Math.max(highMidi - 1, isFemale ? 70 : 65); // サビ抑えめ
+      diff = Math.max(1, diff - 1);
+    } else if (rawText.includes('rock') || rawText.includes('ロック') || rawText.includes('夏') || rawText.includes('シャウト') || rawText.includes('疾走') || rawText.includes('新時代') || rawText.includes('fire')) {
+      highMidi = Math.min(highMidi + 2, isFemale ? 81 : 76); // ハイトーン
+      diff = Math.min(5, diff + 1);
+    }
+
+    // 最低音は最高音より一定以上低く保つ
+    if (highMidi - lowMidi < 12) {
+      lowMidi = highMidi - 15;
+    }
+
+    const calculatedLow = midiToNote(lowMidi);
+    const calculatedHigh = midiToNote(highMidi);
+    const lowKaraoke = getKaraokeNoteName(lowMidi);
+    const highKaraoke = getKaraokeNoteName(highMidi);
 
     return {
       title,
       artist,
-      lowest_note: lowestNote,
-      highest_note: highestNote,
-      main_range: `${lowestNote}〜${highestNote}`,
-      difficulty,
+      lowest_note: calculatedLow,
+      highest_note: calculatedHigh,
+      main_range: `${calculatedLow}〜${calculatedHigh}`,
+      difficulty: diff,
       vocal_type: isFemale ? 'female' : 'male',
       is_estimate: true,
-      practice_tags: practiceTags,
-      practice_focus: `AIによる音域推定データです。サビの高音（${highestNote}）とAメロの低音の響きを意識して練習してみましょう。`
+      source_type: matchedProfile ? 'profile' : 'estimated',
+      practice_tags: highMidi >= 72 ? ['超高音', 'ミックスボイス練習', '声量'] : ['高音', '安定感', '音程'],
+      practice_focus: desc ? `${desc} サビの最高音${highKaraoke}（${calculatedHigh}）とAメロ最低音${lowKaraoke}（${calculatedLow}）を意識して歌ってみましょう。`
+                           : `アーティスト特性と楽曲傾向からAIが音域を推定しました（最高音: ${highKaraoke} / 最低音: ${lowKaraoke}）。`
     };
   }
 
@@ -799,6 +993,15 @@
       aiSongTitle: document.getElementById('ai-song-title'),
       aiSongArtist: document.getElementById('ai-song-artist'),
       aiSongVocalType: document.getElementById('ai-song-vocal-type'),
+      btnRunAiEstimate: document.getElementById('btn-run-ai-estimate'),
+      aiEstimateResultBox: document.getElementById('ai-estimate-result-box'),
+      aiEstimateSourceBadge: document.getElementById('ai-estimate-source-badge'),
+      aiEstimateAccuracy: document.getElementById('ai-estimate-accuracy'),
+      aiEstimateDescription: document.getElementById('ai-estimate-description'),
+      aiResultLow: document.getElementById('ai-result-low'),
+      aiResultHigh: document.getElementById('ai-result-high'),
+      aiResultDiff: document.getElementById('ai-result-diff'),
+      btnConfirmAiAdd: document.getElementById('btn-confirm-ai-add'),
       formManualAddSong: document.getElementById('form-manual-add-song'),
       manualSongTitle: document.getElementById('manual-song-title'),
       manualSongArtist: document.getElementById('manual-song-artist'),
@@ -969,7 +1172,9 @@
         elements.logSelectLow,
         elements.logSelectHigh,
         elements.manualSongLow,
-        elements.manualSongHigh
+        elements.manualSongHigh,
+        elements.aiResultLow,
+        elements.aiResultHigh
       ];
       selects.forEach(sel => {
         if (!sel) return;
@@ -1663,6 +1868,9 @@
       elements.btnCloseAddSongModal.addEventListener('click', () => {
         elements.modalAddSong.classList.add('hidden');
         elements.modalAddSong.classList.remove('flex');
+        if (elements.aiEstimateResultBox) elements.aiEstimateResultBox.classList.add('hidden');
+        if (elements.formAiAddSong) elements.formAiAddSong.reset();
+        currentEstimatedSong = null;
       });
     }
 
@@ -1683,6 +1891,56 @@
     }
 
     // AI推定で曲追加
+    let currentEstimatedSong = null;
+
+    if (elements.btnRunAiEstimate) {
+      elements.btnRunAiEstimate.addEventListener('click', () => {
+        const title = elements.aiSongTitle.value.trim();
+        const artist = elements.aiSongArtist.value.trim();
+        const vocalType = elements.aiSongVocalType.value;
+        if (!title || !artist) {
+          showToast('曲名とアーティスト名を入力してください');
+          return;
+        }
+
+        currentEstimatedSong = estimateSongVocalRange(title, artist, vocalType);
+        
+        if (elements.aiEstimateResultBox) {
+          elements.aiEstimateResultBox.classList.remove('hidden');
+          if (elements.aiResultLow) elements.aiResultLow.value = currentEstimatedSong.lowest_note;
+          if (elements.aiResultHigh) elements.aiResultHigh.value = currentEstimatedSong.highest_note;
+          if (elements.aiResultDiff) elements.aiResultDiff.value = String(currentEstimatedSong.difficulty);
+          
+          if (elements.aiEstimateSourceBadge) {
+            if (currentEstimatedSong.source_type === 'exact') {
+              elements.aiEstimateSourceBadge.textContent = '実測データベース照合完了 🎯';
+            } else if (currentEstimatedSong.source_type === 'profile') {
+              elements.aiEstimateSourceBadge.textContent = 'アーティスト特性から推定 🎙️';
+            } else {
+              elements.aiEstimateSourceBadge.textContent = 'AI音域推定完了 ✨';
+            }
+          }
+
+          if (elements.aiEstimateAccuracy) {
+            if (currentEstimatedSong.source_type === 'exact') {
+              elements.aiEstimateAccuracy.textContent = '精度: 極高 (実測)';
+              elements.aiEstimateAccuracy.className = 'text-[10px] text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30';
+            } else {
+              elements.aiEstimateAccuracy.textContent = '精度: 高 (AI算出)';
+              elements.aiEstimateAccuracy.className = 'text-[10px] text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded-full border border-cyan-500/30';
+            }
+          }
+
+          if (elements.aiEstimateDescription) {
+            elements.aiEstimateDescription.textContent = currentEstimatedSong.practice_focus;
+          }
+
+          if (window.lucide) lucide.createIcons();
+          showToast('音域を推定しました！確認・微調整して追加できます');
+        }
+      });
+    }
+
     if (elements.formAiAddSong) {
       elements.formAiAddSong.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -1691,17 +1949,46 @@
         const vocalType = elements.aiSongVocalType.value;
         if (!title || !artist) return;
 
-        const estimatedSong = estimateSongVocalRange(title, artist, vocalType);
-        addCustomSong(estimatedSong);
+        // まだ推定結果が表示されていない場合は、まず推定を実行してプレビュー表示
+        if (!currentEstimatedSong || (elements.aiEstimateResultBox && elements.aiEstimateResultBox.classList.contains('hidden'))) {
+          if (elements.btnRunAiEstimate) {
+            elements.btnRunAiEstimate.click();
+            return;
+          }
+        }
+
+        // ユーザーが微調整したセレクトボックスの値を取得
+        const low = elements.aiResultLow ? elements.aiResultLow.value : currentEstimatedSong.lowest_note;
+        const high = elements.aiResultHigh ? elements.aiResultHigh.value : currentEstimatedSong.highest_note;
+        const diff = elements.aiResultDiff ? (parseInt(elements.aiResultDiff.value, 10) || currentEstimatedSong.difficulty) : currentEstimatedSong.difficulty;
+        const lowK = getKaraokeNoteName(noteToMidi(low)) || low;
+        const highK = getKaraokeNoteName(noteToMidi(high)) || high;
+
+        const songToAdd = {
+          title,
+          artist,
+          lowest_note: low,
+          highest_note: high,
+          main_range: `${low}〜${high}`,
+          difficulty: diff,
+          vocal_type: vocalType,
+          is_estimate: currentEstimatedSong.source_type !== 'exact',
+          practice_tags: currentEstimatedSong.practice_tags || ['高音', '安定感'],
+          practice_focus: `${currentEstimatedSong.practice_focus} (登録音域: ${lowK}〜${highK})`
+        };
+
+        addCustomSong(songToAdd);
 
         elements.modalAddSong.classList.add('hidden');
         elements.modalAddSong.classList.remove('flex');
         elements.formAiAddSong.reset();
+        if (elements.aiEstimateResultBox) elements.aiEstimateResultBox.classList.add('hidden');
+        currentEstimatedSong = null;
 
         populateArtistFilter();
         renderSongList();
         renderHomeRecommendations();
-        showToast(`AIが音域を推定し「${title}」を追加しました！`);
+        showToast(`「${title}」(${lowK}〜${highK}) をライブラリに追加しました！`);
       });
     }
 

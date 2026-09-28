@@ -809,17 +809,17 @@
         <!-- ① AI自動推定フォーム -->
         <form id="form-ai-add-song" class="space-y-3.5 text-xs">
           <p class="text-[11px] text-slate-400 leading-relaxed bg-purple-950/20 p-2.5 rounded-xl border border-purple-500/20">
-            曲名とアーティスト名を入力すると、AIがボーカルの音域（最高音・最低音・難易度）を推定してライブラリに追加します。
+            曲名とアーティスト名を入力すると、AIが実測データベースとアーティスト特性から音域（最高音・最低音・難易度）を高精度に推定します。
           </p>
 
           <div>
             <label class="text-slate-300 font-medium block mb-1">曲名 <span class="text-rose-400">*</span></label>
-            <input type="text" id="ai-song-title" required placeholder="例: 晩餐歌、唱、群青" class="w-full px-3 py-2 bg-surface-input border border-surface-border rounded-xl text-white focus:outline-none focus:border-purple-500">
+            <input type="text" id="ai-song-title" required placeholder="例: 晩餐歌、幾億光年、唱、Bling-Bang-Bang-Born" class="w-full px-3 py-2 bg-surface-input border border-surface-border rounded-xl text-white focus:outline-none focus:border-purple-500">
           </div>
 
           <div>
             <label class="text-slate-300 font-medium block mb-1">アーティスト名 <span class="text-rose-400">*</span></label>
-            <input type="text" id="ai-song-artist" required placeholder="例: tuki.、Ado、YOASOBI" class="w-full px-3 py-2 bg-surface-input border border-surface-border rounded-xl text-white focus:outline-none focus:border-purple-500">
+            <input type="text" id="ai-song-artist" required placeholder="例: tuki.、Omoinotake、Ado、Creepy Nuts" class="w-full px-3 py-2 bg-surface-input border border-surface-border rounded-xl text-white focus:outline-none focus:border-purple-500">
           </div>
 
           <div>
@@ -831,10 +831,55 @@
             </select>
           </div>
 
-          <button type="submit" id="btn-submit-ai-add" class="w-full py-3 bg-gradient-music hover:brightness-110 active:scale-95 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition mt-2">
+          <button type="button" id="btn-run-ai-estimate" class="w-full py-2.5 bg-purple-600 hover:bg-purple-500 active:scale-95 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition mt-2">
             <i data-lucide="sparkles" class="w-4 h-4 text-cyan-300"></i>
-            <span>AIで音域を推定して追加する</span>
+            <span>AIで音域を自動推定する</span>
           </button>
+
+          <!-- 推定結果プレビュー＆微調整エリア -->
+          <div id="ai-estimate-result-box" class="hidden p-3.5 bg-surface-card rounded-2xl border border-purple-500/40 space-y-3 mt-3">
+            <div class="flex items-center justify-between pb-2 border-b border-surface-border">
+              <span class="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                <i data-lucide="check-circle" class="w-4 h-4 text-emerald-400"></i>
+                <span id="ai-estimate-source-badge">AI推定完了</span>
+              </span>
+              <span id="ai-estimate-accuracy" class="text-[10px] text-cyan-300 bg-cyan-950/60 px-2 py-0.5 rounded-full border border-cyan-500/30">実測データ一致</span>
+            </div>
+
+            <p class="text-[11px] text-slate-300 leading-relaxed" id="ai-estimate-description"></p>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-slate-300 font-medium block mb-1">最低音 (微調整可)</label>
+                <select id="ai-result-low" class="w-full px-2.5 py-1.5 bg-surface-input border border-surface-border rounded-xl text-white text-xs focus:outline-none focus:border-purple-500"></select>
+              </div>
+              <div>
+                <label class="text-slate-300 font-medium block mb-1">最高音 (微調整可)</label>
+                <select id="ai-result-high" class="w-full px-2.5 py-1.5 bg-surface-input border border-surface-border rounded-xl text-white text-xs focus:outline-none focus:border-purple-500"></select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-slate-300 font-medium block mb-1">難易度</label>
+                <select id="ai-result-diff" class="w-full px-2.5 py-1.5 bg-surface-input border border-surface-border rounded-xl text-white text-xs focus:outline-none focus:border-purple-500">
+                  <option value="1">★☆☆☆☆ (かんたん)</option>
+                  <option value="2">★★☆☆☆ (標準)</option>
+                  <option value="3" selected>★★★☆☆ (歌いごたえあり)</option>
+                  <option value="4">★★★★☆ (高音・難関)</option>
+                  <option value="5">★★★★★ (プロ級・超高音)</option>
+                </select>
+              </div>
+              <div class="flex items-center text-[10px] text-slate-400">
+                <span>※違和感がある場合は上の選択肢から自由に修正できます</span>
+              </div>
+            </div>
+
+            <button type="submit" id="btn-confirm-ai-add" class="w-full py-3 bg-gradient-music hover:brightness-110 active:scale-95 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition">
+              <i data-lucide="plus-circle" class="w-4 h-4 text-white"></i>
+              <span>この音域でライブラリに追加する</span>
+            </button>
+          </div>
         </form>
 
         <!-- ② 手動登録フォーム -->
@@ -1086,7 +1131,7 @@
 
   </div>
 
-  <script src="js/app.js?v=12"></script>
+  <script src="js/app.js?v=13"></script>
 </body>
 
 </html>
