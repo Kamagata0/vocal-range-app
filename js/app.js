@@ -735,6 +735,80 @@
     };
   }
 
+  const WORKER_AI_ENDPOINT = 'https://round-darkness-9ccc.gamemake0725.workers.dev';
+
+  function normalizeNoteStringToStandard(str) {
+    if (!str) return 'C4';
+    str = String(str).trim();
+    if (/^[A-G]#?-?\d+$/i.test(str)) {
+      return str.toUpperCase();
+    }
+    const kMap = {
+      'mid1c': 'C3', 'mid1c#': 'C#3', 'mid1d': 'D3', 'mid1d#': 'D#3', 'mid1e': 'E3', 'mid1f': 'F3', 'mid1f#': 'F#3', 'mid1g': 'G3', 'mid1g#': 'G#3',
+      'mid2a': 'A3', 'mid2a#': 'A#3', 'mid2b': 'B3', 'mid2c': 'C4', 'mid2c#': 'C#4', 'mid2d': 'D4', 'mid2d#': 'D#4', 'mid2e': 'E4', 'mid2f': 'F4', 'mid2f#': 'F#4', 'mid2g': 'G4', 'mid2g#': 'G#4',
+      'hia': 'A4', 'hia#': 'A#4', 'hib': 'B4', 'hic': 'C5', 'hic#': 'C#5', 'hid': 'D5', 'hid#': 'D#5', 'hie': 'E5', 'hif': 'F5', 'hif#': 'F#5', 'hig': 'G5', 'hig#': 'G#5',
+      'hihia': 'A5', 'hihia#': 'A#5', 'hihib': 'B5', 'hihic': 'C6',
+      'lowg': 'G2', 'lowg#': 'G#2', 'lowa': 'A2', 'lowa#': 'A#2', 'lowb': 'B2'
+    };
+    const lower = str.toLowerCase();
+    if (kMap[lower]) return kMap[lower];
+    return 'C4';
+  }
+
+  async function fetchSongVocalRangeFromAI(title, artist, vocalType) {
+    // 1. ローカル実測辞書にある曲は即座に返却（0秒＆API消費ゼロ）
+    const localEst = estimateSongVocalRange(title, artist, vocalType);
+    if (localEst.source_type === 'exact') {
+      return localEst;
+    }
+
+    // 2. Cloudflare Worker経由でGoogle Gemini APIを呼び出し
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const res = await fetch(WORKER_AI_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, artist, vocalType }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        const text = await res.text();
+        const cleanJsonStr = text.replace(/```json/gi, '').replace(/```/g, '').trim();
+        const data = JSON.parse(cleanJsonStr);
+
+        if (data && (data.highest_note || data.lowest_note)) {
+          const normLow = normalizeNoteStringToStandard(data.lowest_note || 'C3');
+          const normHigh = normalizeNoteStringToStandard(data.highest_note || 'A4');
+          const lowK = getKaraokeNoteName(noteToMidi(normLow)) || normLow;
+          const highK = getKaraokeNoteName(noteToMidi(normHigh)) || normHigh;
+
+          return {
+            title,
+            artist,
+            lowest_note: normLow,
+            highest_note: normHigh,
+            main_range: `${normLow}〜${normHigh}`,
+            difficulty: data.difficulty || 3,
+            vocal_type: data.vocal_type || vocalType || 'male',
+            is_estimate: false,
+            source_type: 'gemini',
+            practice_tags: Array.isArray(data.practice_tags) ? data.practice_tags : ['AI解析', '高音'],
+            practice_focus: data.practice_focus || `Google Geminiが楽曲知識からボーカル音域を自動分析しました（最高音: ${highK} / 最低音: ${lowK}）。`
+          };
+        }
+      }
+    } catch (err) {
+      console.warn('Gemini Worker fetch error, fallback to local estimate:', err);
+    }
+
+    // 3. 通信エラー等の場合はローカル推論に自動フォールバック
+    return localEst;
+  }
+
   // ================= 5. ピッチ検出 =================
   let audioContext = null;
   let analyser = null;
@@ -1894,7 +1968,7 @@
     let currentEstimatedSong = null;
 
     if (elements.btnRunAiEstimate) {
-      elements.btnRunAiEstimate.addEventListener('click', () => {
+      elements.btnRunAiEstimate.addEventListener('click', async () => {
         const title = elements.aiSongTitle.value.trim();
         const artist = elements.aiSongArtist.value.trim();
         const vocalType = elements.aiSongVocalType.value;
@@ -1903,7 +1977,23 @@
           return;
         }
 
-        currentEstimatedSong = estimateSongVocalRange(title, artist, vocalType);
+        const originalBtnHtml = elements.btnRunAiEstimate.innerHTML;
+        elements.btnRunAiEstimate.disabled = true;
+        elements.btnRunAiEstimate.innerHTML = `
+          <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-cyan-300 inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span>Gemini AIが楽曲音域を分析中...</span>
+        `;
+
+        try {
+          currentEstimatedSong = await fetchSongVocalRangeFromAI(title, artist, vocalType);
+        } finally {
+          elements.btnRunAiEstimate.disabled = false;
+          elements.btnRunAiEstimate.innerHTML = originalBtnHtml;
+          if (window.lucide) lucide.createIcons();
+        }
         
         if (elements.aiEstimateResultBox) {
           elements.aiEstimateResultBox.classList.remove('hidden');
@@ -1912,7 +2002,9 @@
           if (elements.aiResultDiff) elements.aiResultDiff.value = String(currentEstimatedSong.difficulty);
           
           if (elements.aiEstimateSourceBadge) {
-            if (currentEstimatedSong.source_type === 'exact') {
+            if (currentEstimatedSong.source_type === 'gemini') {
+              elements.aiEstimateSourceBadge.textContent = 'Google Gemini AI解析完了 🤖';
+            } else if (currentEstimatedSong.source_type === 'exact') {
               elements.aiEstimateSourceBadge.textContent = '実測データベース照合完了 🎯';
             } else if (currentEstimatedSong.source_type === 'profile') {
               elements.aiEstimateSourceBadge.textContent = 'アーティスト特性から推定 🎙️';
@@ -1922,7 +2014,10 @@
           }
 
           if (elements.aiEstimateAccuracy) {
-            if (currentEstimatedSong.source_type === 'exact') {
+            if (currentEstimatedSong.source_type === 'gemini') {
+              elements.aiEstimateAccuracy.textContent = 'AIリアルタイム解析';
+              elements.aiEstimateAccuracy.className = 'text-[10px] text-purple-300 bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-500/30';
+            } else if (currentEstimatedSong.source_type === 'exact') {
               elements.aiEstimateAccuracy.textContent = '精度: 極高 (実測)';
               elements.aiEstimateAccuracy.className = 'text-[10px] text-emerald-300 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-500/30';
             } else {
@@ -1936,7 +2031,7 @@
           }
 
           if (window.lucide) lucide.createIcons();
-          showToast('音域を推定しました！確認・微調整して追加できます');
+          showToast('音域を分析しました！確認・微調整して追加できます');
         }
       });
     }
