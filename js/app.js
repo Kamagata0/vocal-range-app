@@ -650,16 +650,58 @@
     { match: ["乃木坂46", "櫻坂46", "日向坂46", "AKB48"], baseLow: "A3", baseHigh: "C5", diff: 2, vocal: "female", desc: "誰でも歌いやすいアイドルポップス。最高音はhiB〜hiC#付近です。" }
   ];
 
+  const ARTIST_NAME_ALIASES = [
+    { official: 'Saucy Dog', keys: ['saucy', 'saucydog', 'サウシー', 'さうしー', 'サウシードッグ', 'さうしーどっく'] },
+    { official: 'ILLIT', keys: ['illit', 'アイリット', 'あいりっと'] },
+    { official: 'Official髭男dism', keys: ['official髭男dism', '髭男', 'ヒゲダン', 'ひげだん', 'higedan'] },
+    { official: 'Mrs. GREEN APPLE', keys: ['mrs. green apple', 'mrs', 'ミセス', 'みせす'] },
+    { official: 'King Gnu', keys: ['king gnu', 'kinggnu', 'キングヌー', 'きんぐぬー'] },
+    { official: 'Vaundy', keys: ['vaundy', 'バウンディ', 'ばうんでぃ'] },
+    { official: '米津玄師', keys: ['米津玄師', 'よねづけんし', 'よねづ', 'yonezu'] },
+    { official: '優里', keys: ['優里', 'ゆうり', 'yuuri'] },
+    { official: 'back number', keys: ['back number', 'backnumber', 'バックナンバー', 'ばっくなんばー'] },
+    { official: 'Ado', keys: ['ado', 'アド', 'あど'] },
+    { official: 'YOASOBI', keys: ['yoasobi', 'ヨアソビ', 'よあそび', '幾田りら', 'ikura'] },
+    { official: 'tuki.', keys: ['tuki', 'tuki.', 'ツキ', 'つき'] },
+    { official: 'Omoinotake', keys: ['omoinotake', 'オモイノタケ', 'おもいのたけ'] },
+    { official: 'Creepy Nuts', keys: ['creepy nuts', 'creepynuts', 'creepy', 'クリーピーナッツ', 'くりーぴーなっつ'] },
+    { official: 'ヨルシカ', keys: ['ヨルシカ', 'よるしか', 'yorushika', 'suis'] },
+    { official: '緑黄色社会', keys: ['緑黄色社会', 'りょくおうしょくしゃかい', 'リョクシャカ', 'りょくしゃか'] },
+    { official: 'マカロニえんぴつ', keys: ['マカロニえんぴつ', 'まかろにえんぴつ', 'マカえん', 'まかえん'] }
+  ];
+
+  function resolveOfficialArtistName(rawStr) {
+    if (!rawStr) return '';
+    const clean = rawStr.toLowerCase().replace(/[\s\-_・、。！？!?]/g, '');
+    for (const item of ARTIST_NAME_ALIASES) {
+      if (item.keys.some(k => clean.includes(k.toLowerCase().replace(/[\s\-_・]/g, '')))) {
+        return item.official;
+      }
+    }
+    return rawStr;
+  }
+
   function estimateSongVocalRange(title, artist, vocalType) {
     const rawText = `${title} ${artist}`.toLowerCase().replace(/[\s\-_・、。！？!?]/g, '');
+    const resolvedArtist = resolveOfficialArtistName(artist);
 
     // 1. 実測辞書（KNOWN_SONGS_MAP）を最優先検索
     for (const song of KNOWN_SONGS_MAP) {
       const matchKeyword = song.keywords.some(kw => rawText.includes(kw.toLowerCase().replace(/[\s\-_・]/g, '')));
-      const matchArtist = !song.artistKey || rawText.includes(song.artistKey.toLowerCase());
+      
+      let matchArtist = !artist || !song.artistKey;
+      if (song.artistKey) {
+        const artistEntry = ARTIST_NAME_ALIASES.find(a => a.keys.some(k => k.includes(song.artistKey) || song.artistKey.includes(k)));
+        if (artistEntry) {
+          matchArtist = artistEntry.keys.some(k => rawText.includes(k.toLowerCase().replace(/[\s\-_・]/g, '')));
+        } else {
+          matchArtist = rawText.includes(song.artistKey.toLowerCase());
+        }
+      }
+
       if (matchKeyword && matchArtist) {
         const officialTitle = song.officialTitle || song.keywords[0];
-        const officialArtist = song.officialArtist || (song.artistKey ? song.artistKey.toUpperCase() : artist);
+        const officialArtist = song.officialArtist || resolvedArtist || artist;
         const tieUp = song.desc.includes('主題歌') || song.desc.includes('OP') || song.desc.includes('ED') || song.desc.includes('CM') || song.desc.includes('テーマ')
           ? song.desc.split('。')[0] : '';
         return {
@@ -736,9 +778,9 @@
 
     return {
       title,
-      artist,
+      artist: resolvedArtist || artist,
       identified_title: title,
-      identified_artist: artist,
+      identified_artist: resolvedArtist || artist,
       tie_up: '',
       lowest_note: calculatedLow,
       highest_note: calculatedHigh,
@@ -783,7 +825,7 @@
     // 2. Cloudflare Worker経由でGoogle Gemini APIを呼び出し（実測データ制約＆正式名判定）
     const callApi = async () => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const timeoutId = setTimeout(() => controller.abort(), 25000); // 25秒へ延長
       const payloadVocalType = (!vocalType || vocalType === 'auto') ? '自動判定' : vocalType;
 
       const res = await fetch(WORKER_AI_ENDPOINT, {
