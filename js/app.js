@@ -800,18 +800,23 @@
   function normalizeNoteStringToStandard(str) {
     if (!str) return 'C4';
     str = String(str).trim();
-    if (/^[A-G]#?-?\d+$/i.test(str)) {
-      return str.toUpperCase();
+    // 1. 標準ピッチ表記 (例: C#5, D3, G#4 など) が含まれている場合は直接抽出
+    const stdMatch = str.match(/\b([A-G]#?-?\d+)\b/i);
+    if (stdMatch) {
+      return stdMatch[1].toUpperCase();
     }
+    // 2. 日本のカラオケ表記 (例: hiC, mid2G#, lowAなど)
     const kMap = {
       'mid1c': 'C3', 'mid1c#': 'C#3', 'mid1d': 'D3', 'mid1d#': 'D#3', 'mid1e': 'E3', 'mid1f': 'F3', 'mid1f#': 'F#3', 'mid1g': 'G3', 'mid1g#': 'G#3',
       'mid2a': 'A3', 'mid2a#': 'A#3', 'mid2b': 'B3', 'mid2c': 'C4', 'mid2c#': 'C#4', 'mid2d': 'D4', 'mid2d#': 'D#4', 'mid2e': 'E4', 'mid2f': 'F4', 'mid2f#': 'F#4', 'mid2g': 'G4', 'mid2g#': 'G#4',
       'hia': 'A4', 'hia#': 'A#4', 'hib': 'B4', 'hic': 'C5', 'hic#': 'C#5', 'hid': 'D5', 'hid#': 'D#5', 'hie': 'E5', 'hif': 'F5', 'hif#': 'F#5', 'hig': 'G5', 'hig#': 'G#5',
       'hihia': 'A5', 'hihia#': 'A#5', 'hihib': 'B5', 'hihic': 'C6',
-      'lowg': 'G2', 'lowg#': 'G#2', 'lowa': 'A2', 'lowa#': 'A#2', 'lowb': 'B2'
+      'lowlow': 'C2', 'lowg': 'G2', 'lowg#': 'G#2', 'lowa': 'A2', 'lowa#': 'A#2', 'lowb': 'B2'
     };
     const lower = str.toLowerCase();
-    if (kMap[lower]) return kMap[lower];
+    for (const [key, val] of Object.entries(kMap)) {
+      if (lower.includes(key)) return val;
+    }
     return 'C4';
   }
 
@@ -864,19 +869,21 @@
           const falsettoK = falsettoNorm ? getKaraokeNoteName(noteToMidi(falsettoNorm)) : '';
 
           let focusText = data.practice_focus || '';
-          const lyricDetails = [];
-          if (data.highest_lyric) lyricDetails.push(`【地最高: ${highK}】${data.highest_lyric}`);
-          if (data.falsetto_lyric && falsettoK) lyricDetails.push(`【裏最高: ${falsettoK}】${data.falsetto_lyric}`);
-          if (data.lowest_lyric) lyricDetails.push(`【最低音: ${lowK}】${data.lowest_lyric}`);
+          if (!focusText.includes('最低音') && !focusText.includes('最高音')) {
+            const lyricDetails = [];
+            if (data.highest_lyric) lyricDetails.push(`【地最高: ${highK}】${data.highest_lyric}`);
+            if (data.falsetto_lyric && falsettoK) lyricDetails.push(`【裏最高: ${falsettoK}】${data.falsetto_lyric}`);
+            if (data.lowest_lyric) lyricDetails.push(`【最低音: ${lowK}】${data.lowest_lyric}`);
 
-          if (lyricDetails.length > 0) {
-            focusText = `${lyricDetails.join(' / ')}。\n${focusText}`.trim();
-          } else if (data.source_note) {
-            focusText = `${data.source_note} ${focusText}`.trim();
-          } else if (falsettoK) {
-            focusText = `最高音: ${highK} (裏声: ${falsettoK}) / 最低音: ${lowK}。${focusText}`.trim();
-          } else {
-            focusText = `最高音: ${highK} / 最低音: ${lowK}。${focusText}`.trim();
+            if (lyricDetails.length > 0) {
+              focusText = `${lyricDetails.join(' / ')}。\n${focusText}`.trim();
+            } else if (data.source_note) {
+              focusText = `${data.source_note} ${focusText}`.trim();
+            } else if (falsettoK) {
+              focusText = `最高音: ${highK} (裏声: ${falsettoK}) / 最低音: ${lowK}。${focusText}`.trim();
+            } else {
+              focusText = `最高音: ${highK} / 最低音: ${lowK}。${focusText}`.trim();
+            }
           }
 
           const detectedVocal = data.vocal_type || (vocalType && vocalType !== 'auto' ? vocalType : 'male');
