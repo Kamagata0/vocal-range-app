@@ -822,7 +822,14 @@
           const falsettoK = falsettoNorm ? getKaraokeNoteName(noteToMidi(falsettoNorm)) : '';
 
           let focusText = data.practice_focus || '';
-          if (data.source_note) {
+          const lyricDetails = [];
+          if (data.highest_lyric) lyricDetails.push(`【地最高: ${highK}】${data.highest_lyric}`);
+          if (data.falsetto_lyric && falsettoK) lyricDetails.push(`【裏最高: ${falsettoK}】${data.falsetto_lyric}`);
+          if (data.lowest_lyric) lyricDetails.push(`【最低音: ${lowK}】${data.lowest_lyric}`);
+
+          if (lyricDetails.length > 0) {
+            focusText = `${lyricDetails.join(' / ')}。\n${focusText}`.trim();
+          } else if (data.source_note) {
             focusText = `${data.source_note} ${focusText}`.trim();
           } else if (falsettoK) {
             focusText = `最高音: ${highK} (裏声: ${falsettoK}) / 最低音: ${lowK}。${focusText}`.trim();
