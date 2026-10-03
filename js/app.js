@@ -159,9 +159,27 @@
     return `${noteName}`;
   }
 
+  const FLAT_TO_SHARP_MAP = {
+    'DB': 'C#', 'EB': 'D#', 'GB': 'F#', 'AB': 'G#', 'BB': 'A#', 'CB': 'B', 'FB': 'E'
+  };
+
   function noteToMidi(noteStr) {
     if (!noteStr || typeof noteStr !== 'string') return null;
-    const match = noteStr.trim().toUpperCase().match(/^([A-G]#?)(-?\d+)$/);
+    const clean = noteStr.trim();
+    // フラット表記 (例: Bb4, Eb5, Ab3 など) の処理
+    const flatMatch = clean.match(/^([A-Ga-g])b(-?\d+)$/);
+    if (flatMatch) {
+      const upper = flatMatch[1].toUpperCase() + 'B';
+      const octave = parseInt(flatMatch[2], 10);
+      const sharpNote = FLAT_TO_SHARP_MAP[upper];
+      if (sharpNote) {
+        const adjOctave = (upper === 'CB') ? octave - 1 : octave;
+        const noteIndex = NOTE_NAMES.indexOf(sharpNote);
+        return (adjOctave + 1) * 12 + noteIndex;
+      }
+    }
+
+    const match = clean.toUpperCase().match(/^([A-G]#?)(-?\d+)$/);
     if (!match) return null;
     const note = match[1];
     const octave = parseInt(match[2], 10);
@@ -806,6 +824,18 @@
   function normalizeNoteStringToStandard(str) {
     if (!str) return 'C4';
     str = String(str).trim();
+    // 0. 洋楽フラット表記 (例: Bb4, Eb5, Ab3 など) をシャープに変換
+    const flatMatch = str.match(/\b([A-Ga-g])b(-?\d+)\b/);
+    if (flatMatch) {
+      const upper = flatMatch[1].toUpperCase() + 'B';
+      const octave = parseInt(flatMatch[2], 10);
+      const sharpNote = FLAT_TO_SHARP_MAP[upper];
+      if (sharpNote) {
+        const adjOctave = (upper === 'CB') ? octave - 1 : octave;
+        return `${sharpNote}${adjOctave}`;
+      }
+    }
+
     // 1. 標準ピッチ表記 (例: C#5, D3, G#4 など) が含まれている場合は直接抽出
     const stdMatch = str.match(/\b([A-G]#?-?\d+)\b/i);
     if (stdMatch) {
