@@ -589,7 +589,14 @@
     // 定番J-POP・バンド
     { keywords: ["なんでもないよ", "なんでもないよ、"], artistKey: "マカロニえんぴつ", lowest: "B2", highest: "A#4", type: "male", diff: 4, tags: ["感情表現", "高音", "バラード"], desc: "最高音hiA#。語りかけるようなAメロからサビの情熱的な叫び。" },
     { keywords: ["恋人ごっこ", "こいびとごっこ"], artistKey: "マカロニえんぴつ", lowest: "C3", highest: "A4", type: "male", diff: 3, tags: ["高音", "ポップス", "エモい"], desc: "最高音hiA。感情の揺れを音程に乗せる練習に。" },
-    { keywords: ["結", "ゆい"], artistKey: "saucy dog", lowest: "C3", highest: "G#4", type: "male", diff: 3, tags: ["バラード", "温かさ", "中高音"], desc: "最高音mid2G#。真っ直ぐな言葉を届けるウェディングソング。" },
+    // Saucy Dog
+    { keywords: ["いつか", "itsuka"], artistKey: "saucy", officialTitle: "いつか", officialArtist: "Saucy Dog", lowest: "D3", highest: "C5", type: "male", diff: 4, tags: ["超高音", "ミックスボイス", "裏声切り替え"], desc: "音域.com実測データ照合完了。地声最低音mid1D(D3)、地声最高音hiC(C5)、裏声最高音hiE(E5)。大サビの切ないhiCとhiEのファルセットが最大の難所です。" },
+    { keywords: ["シンデレラボーイ", "cinderellaboy"], artistKey: "saucy", officialTitle: "シンデレラボーイ", officialArtist: "Saucy Dog", lowest: "B2", highest: "A#4", type: "male", diff: 4, tags: ["ハイトーン", "裏声", "切ない"], desc: "音域.com実測データ照合完了。地声最低音mid1B(B2)、地声最高音hiA#(A#4)、裏声最高音hiD(D5)。サビ後半の感情的なハイトーン。" },
+    { keywords: ["結", "ゆい"], artistKey: "saucy", officialTitle: "結", officialArtist: "Saucy Dog", lowest: "C3", highest: "G#4", type: "male", diff: 3, tags: ["バラード", "温かさ", "中高音"], desc: "最高音mid2G#。真っ直ぐな言葉を届けるウェディングソング。" },
+
+    // ILLIT
+    { keywords: ["almond chocolate", "アーモンドチョコレート", "almondchocolate"], artistKey: "illit", officialTitle: "Almond Chocolate", officialArtist: "ILLIT", lowest: "A3", highest: "D5", type: "female", diff: 3, tags: ["K-POP", "映画主題歌", "ハイトーン"], desc: "映画『顔だけじゃ好きになりません』主題歌。地声最低音mid1A(A3)、地声最高音hiD(D5)、裏声最高音hiF#(F#5)。" },
+    { keywords: ["magnetic", "マグネティック"], artistKey: "illit", officialTitle: "Magnetic", officialArtist: "ILLIT", lowest: "A3", highest: "C#5", type: "female", diff: 3, tags: ["K-POP", "バイラル", "ファルセット"], desc: "地声最低音mid1A(A3)、地声最高音hiC#(C#5)、裏声最高音hiE(E5)。" },
     { keywords: ["メリッサ"], artistKey: "ポルノグラフィティ", lowest: "C#3", highest: "A#4", type: "male", diff: 4, tags: ["アニメOP", "ハイトーン", "ロック"], desc: "『ハガレン』OP。サビ頭のhiA#の力強い突き抜け感。" },
     { keywords: ["ミュージック・アワー", "ミュージックアワー"], artistKey: "ポルノグラフィティ", lowest: "D3", highest: "B4", type: "male", diff: 4, tags: ["夏ソング", "高音", "滑舌"], desc: "最高音hiB。早口のラジオ語りと爽快なサビのハイトーン。" },
     { keywords: ["driver's high", "ドライバーズハイ"], artistKey: "l'arc", lowest: "B2", highest: "B4", type: "male", diff: 4, tags: ["gto", "疾走感", "高音"], desc: "アニメ『GTO』OP。サビのhiBへの駆け上がりと爽快なドライブ感。" },
