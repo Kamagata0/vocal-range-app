@@ -600,7 +600,7 @@
     { keywords: ["magnetic", "マグネティック"], artistKey: "illit", officialTitle: "Magnetic", officialArtist: "ILLIT", lowest: "A3", highest: "C#5", type: "female", diff: 3, tags: ["K-POP", "バイラル", "ファルセット"], desc: "地声最低音mid1A(A3)、地声最高音hiC#(C#5)、裏声最高音hiE(E5)。" },
 
     // RADWIMPS
-    { keywords: ["いいんですか", "iindesuka"], artistKey: "rad", officialTitle: "いいんですか?", officialArtist: "RADWIMPS", lowest: "A3", highest: "A4", type: "male", diff: 2, tags: ["地声", "リズム", "アップテンポ"], desc: "音域.com実測データ照合完了。地声最低音mid1A(A3)、地声最高音mid2A(A4)。サビの早口とリズムキープがポイントです。" },
+    { keywords: ["いいんですか", "iindesuka"], artistKey: "rad", officialTitle: "いいんですか?", officialArtist: "RADWIMPS", lowest: "F#3", highest: "G#4", type: "male", diff: 2, tags: ["地声", "リズム", "アップテンポ"], desc: "音域速報・音域.com実測データ照合完了。地声最低音mid1F#(F#3)、地声最高音mid2G#(G#4)。平均的な男性でも歌いやすい音域です。" },
     { keywords: ["有心論", "ゆうしんろん"], artistKey: "rad", officialTitle: "有心論", officialArtist: "RADWIMPS", lowest: "A2", highest: "A#4", type: "male", diff: 4, tags: ["高音", "ミックスボイス", "名曲"], desc: "地声最低音mid1A(A2)、地声最高音hiA#(A#4)。" },
     { keywords: ["me me she", "メメシェ"], artistKey: "rad", officialTitle: "me me she", officialArtist: "RADWIMPS", lowest: "G#2", highest: "F#4", type: "male", diff: 3, tags: ["バラード", "低音", "切ない"], desc: "地声最低音lowG#(G#2)、地声最高音mid2F#(F#4)。" },
     { keywords: ["メリッサ"], artistKey: "ポルノグラフィティ", lowest: "C#3", highest: "A#4", type: "male", diff: 4, tags: ["アニメOP", "ハイトーン", "ロック"], desc: "『ハガレン』OP。サビ頭のhiA#の力強い突き抜け感。" },
