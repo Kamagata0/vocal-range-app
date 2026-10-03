@@ -592,6 +592,7 @@
     // Saucy Dog
     { keywords: ["いつか", "itsuka"], artistKey: "saucy", officialTitle: "いつか", officialArtist: "Saucy Dog", lowest: "D3", highest: "C5", type: "male", diff: 4, tags: ["超高音", "ミックスボイス", "裏声切り替え"], desc: "音域.com実測データ照合完了。地声最低音mid1D(D3)、地声最高音hiC(C5)、裏声最高音hiE(E5)。大サビの切ないhiCとhiEのファルセットが最大の難所です。" },
     { keywords: ["シンデレラボーイ", "cinderellaboy"], artistKey: "saucy", officialTitle: "シンデレラボーイ", officialArtist: "Saucy Dog", lowest: "B2", highest: "A#4", type: "male", diff: 4, tags: ["ハイトーン", "裏声", "切ない"], desc: "音域.com実測データ照合完了。地声最低音mid1B(B2)、地声最高音hiA#(A#4)、裏声最高音hiD(D5)。サビ後半の感情的なハイトーン。" },
+    { keywords: ["月に住む君", "つきにすむきみ"], artistKey: "saucy", officialTitle: "月に住む君", officialArtist: "Saucy Dog", lowest: "D3", highest: "A#4", type: "male", diff: 4, tags: ["ミックスボイス", "切ない", "ファルセット"], desc: "音域.com実測データ照合完了。地声最低音mid1D(D3)、地声最高音hiA#(A#4)、裏声最高音hiC(C5)。" },
     { keywords: ["結", "ゆい"], artistKey: "saucy", officialTitle: "結", officialArtist: "Saucy Dog", lowest: "C3", highest: "G#4", type: "male", diff: 3, tags: ["バラード", "温かさ", "中高音"], desc: "最高音mid2G#。真っ直ぐな言葉を届けるウェディングソング。" },
 
     // ILLIT
@@ -651,7 +652,7 @@
 
   function estimateSongVocalRange(title, artist, vocalType) {
     const rawText = `${title} ${artist}`.toLowerCase().replace(/[\s\-_・、。！？!?]/g, '');
-    
+
     // 1. 実測辞書（KNOWN_SONGS_MAP）を最優先検索
     for (const song of KNOWN_SONGS_MAP) {
       const matchKeyword = song.keywords.some(kw => rawText.includes(kw.toLowerCase().replace(/[\s\-_・]/g, '')));
@@ -748,7 +749,7 @@
       source_type: matchedProfile ? 'profile' : 'estimated',
       practice_tags: highMidi >= 72 ? ['超高音', 'ミックスボイス練習', '声量'] : ['高音', '安定感', '音程'],
       practice_focus: desc ? `${desc} サビの最高音${highKaraoke}（${calculatedHigh}）とAメロ最低音${lowKaraoke}（${calculatedLow}）を意識して歌ってみましょう。`
-                           : `アーティスト特性と楽曲傾向からAIが音域を推定しました（最高音: ${highKaraoke} / 最低音: ${lowKaraoke}）。`
+        : `アーティスト特性と楽曲傾向からAIが音域を推定しました（最高音: ${highKaraoke} / 最低音: ${lowKaraoke}）。`
     };
   }
 
@@ -1098,7 +1099,7 @@
       btnQuickSearch: document.getElementById('btn-quick-search'),
       btnQuickPractice: document.getElementById('btn-quick-practice'),
       btnQuickAi: document.getElementById('btn-quick-ai'),
-      
+
       // 曲一覧・検索
       btnOpenAddSongModal: document.getElementById('btn-open-add-song-modal'),
       songSearchInput: document.getElementById('song-search-input'),
@@ -1858,7 +1859,7 @@
 
       const logs = [...getPracticeLogs()].reverse();
       const labels = logs.length > 0 ? logs.map(l => l.date.slice(5)) : ['9/20', '9/23', '9/25', '今日'];
-      const highNotesMidi = logs.length > 0 
+      const highNotesMidi = logs.length > 0
         ? logs.map(l => noteToMidi(l.highest_note) || 67)
         : [65, 67, 68, 69];
 
@@ -2051,7 +2052,7 @@
           elements.btnRunAiEstimate.innerHTML = originalBtnHtml;
           if (window.lucide) lucide.createIcons();
         }
-        
+
         if (elements.aiEstimateResultBox) {
           elements.aiEstimateResultBox.classList.remove('hidden');
 
@@ -2131,7 +2132,7 @@
           if (elements.aiResultLow) elements.aiResultLow.value = currentEstimatedSong.lowest_note;
           if (elements.aiResultHigh) elements.aiResultHigh.value = currentEstimatedSong.highest_note;
           if (elements.aiResultDiff) elements.aiResultDiff.value = String(currentEstimatedSong.difficulty);
-          
+
           if (elements.aiEstimateSourceBadge) {
             if (currentEstimatedSong.source_type === 'gemini') {
               elements.aiEstimateSourceBadge.textContent = 'Google Gemini AI実測照合 🤖';
