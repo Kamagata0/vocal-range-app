@@ -598,6 +598,11 @@
     // ILLIT
     { keywords: ["almond chocolate", "アーモンドチョコレート", "almondchocolate"], artistKey: "illit", officialTitle: "Almond Chocolate", officialArtist: "ILLIT", lowest: "A3", highest: "D5", type: "female", diff: 3, tags: ["K-POP", "映画主題歌", "ハイトーン"], desc: "映画『顔だけじゃ好きになりません』主題歌。地声最低音mid1A(A3)、地声最高音hiD(D5)、裏声最高音hiF#(F#5)。" },
     { keywords: ["magnetic", "マグネティック"], artistKey: "illit", officialTitle: "Magnetic", officialArtist: "ILLIT", lowest: "A3", highest: "C#5", type: "female", diff: 3, tags: ["K-POP", "バイラル", "ファルセット"], desc: "地声最低音mid1A(A3)、地声最高音hiC#(C#5)、裏声最高音hiE(E5)。" },
+
+    // RADWIMPS
+    { keywords: ["いいんですか", "iindesuka"], artistKey: "rad", officialTitle: "いいんですか?", officialArtist: "RADWIMPS", lowest: "A3", highest: "A4", type: "male", diff: 2, tags: ["地声", "リズム", "アップテンポ"], desc: "音域.com実測データ照合完了。地声最低音mid1A(A3)、地声最高音mid2A(A4)。サビの早口とリズムキープがポイントです。" },
+    { keywords: ["有心論", "ゆうしんろん"], artistKey: "rad", officialTitle: "有心論", officialArtist: "RADWIMPS", lowest: "A2", highest: "A#4", type: "male", diff: 4, tags: ["高音", "ミックスボイス", "名曲"], desc: "地声最低音mid1A(A2)、地声最高音hiA#(A#4)。" },
+    { keywords: ["me me she", "メメシェ"], artistKey: "rad", officialTitle: "me me she", officialArtist: "RADWIMPS", lowest: "G#2", highest: "F#4", type: "male", diff: 3, tags: ["バラード", "低音", "切ない"], desc: "地声最低音lowG#(G#2)、地声最高音mid2F#(F#4)。" },
     { keywords: ["メリッサ"], artistKey: "ポルノグラフィティ", lowest: "C#3", highest: "A#4", type: "male", diff: 4, tags: ["アニメOP", "ハイトーン", "ロック"], desc: "『ハガレン』OP。サビ頭のhiA#の力強い突き抜け感。" },
     { keywords: ["ミュージック・アワー", "ミュージックアワー"], artistKey: "ポルノグラフィティ", lowest: "D3", highest: "B4", type: "male", diff: 4, tags: ["夏ソング", "高音", "滑舌"], desc: "最高音hiB。早口のラジオ語りと爽快なサビのハイトーン。" },
     { keywords: ["driver's high", "ドライバーズハイ"], artistKey: "l'arc", lowest: "B2", highest: "B4", type: "male", diff: 4, tags: ["gto", "疾走感", "高音"], desc: "アニメ『GTO』OP。サビのhiBへの駆け上がりと爽快なドライブ感。" },
@@ -667,7 +672,8 @@
     { official: 'Creepy Nuts', keys: ['creepy nuts', 'creepynuts', 'creepy', 'クリーピーナッツ', 'くりーぴーなっつ'] },
     { official: 'ヨルシカ', keys: ['ヨルシカ', 'よるしか', 'yorushika', 'suis'] },
     { official: '緑黄色社会', keys: ['緑黄色社会', 'りょくおうしょくしゃかい', 'リョクシャカ', 'りょくしゃか'] },
-    { official: 'マカロニえんぴつ', keys: ['マカロニえんぴつ', 'まかろにえんぴつ', 'マカえん', 'まかえん'] }
+    { official: 'マカロニえんぴつ', keys: ['マカロニえんぴつ', 'まかろにえんぴつ', 'マカえん', 'まかえん'] },
+    { official: 'RADWIMPS', keys: ['radwimps', 'radwindps', 'rad', 'ラッドウィンプス', 'らっどうぃんぷす', 'ラッド', 'らっど'] }
   ];
 
   function resolveOfficialArtistName(rawStr) {
