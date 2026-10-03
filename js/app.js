@@ -650,9 +650,16 @@
       const matchKeyword = song.keywords.some(kw => rawText.includes(kw.toLowerCase().replace(/[\s\-_・]/g, '')));
       const matchArtist = !song.artistKey || rawText.includes(song.artistKey.toLowerCase());
       if (matchKeyword && matchArtist) {
+        const officialTitle = song.officialTitle || song.keywords[0];
+        const officialArtist = song.officialArtist || (song.artistKey ? song.artistKey.toUpperCase() : artist);
+        const tieUp = song.desc.includes('主題歌') || song.desc.includes('OP') || song.desc.includes('ED') || song.desc.includes('CM') || song.desc.includes('テーマ')
+          ? song.desc.split('。')[0] : '';
         return {
-          title,
-          artist,
+          title: officialTitle,
+          artist: officialArtist,
+          identified_title: officialTitle,
+          identified_artist: officialArtist,
+          tie_up: tieUp,
           lowest_note: song.lowest,
           highest_note: song.highest,
           main_range: `${song.lowest}〜${song.highest}`,
@@ -661,7 +668,7 @@
           is_estimate: false,
           source_type: 'exact',
           practice_tags: song.tags,
-          practice_focus: `${song.desc} (実測データに基づき精密マッチング)`
+          practice_focus: `${song.desc} (音域サイト実測データ照合完了)`
         };
       }
     }
@@ -722,6 +729,9 @@
     return {
       title,
       artist,
+      identified_title: title,
+      identified_artist: artist,
+      tie_up: '',
       lowest_note: calculatedLow,
       highest_note: calculatedHigh,
       main_range: `${calculatedLow}〜${calculatedHigh}`,
@@ -762,10 +772,10 @@
       return localEst;
     }
 
-    // 2. Cloudflare Worker経由でGoogle Gemini APIを呼び出し
+    // 2. Cloudflare Worker経由でGoogle Gemini APIを呼び出し（実測データ制約＆正式名判定）
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000);
+      const timeoutId = setTimeout(() => controller.abort(), 12000);
 
       const res = await fetch(WORKER_AI_ENDPOINT, {
         method: 'POST',
@@ -786,18 +796,37 @@
           const lowK = getKaraokeNoteName(noteToMidi(normLow)) || normLow;
           const highK = getKaraokeNoteName(noteToMidi(normHigh)) || normHigh;
 
+          const identifiedTitle = data.identified_title || title;
+          const identifiedArtist = data.identified_artist || artist;
+          const tieUp = data.tie_up || '';
+          const falsettoNorm = data.highest_falsetto ? normalizeNoteStringToStandard(data.highest_falsetto) : null;
+          const falsettoK = falsettoNorm ? getKaraokeNoteName(noteToMidi(falsettoNorm)) : '';
+
+          let focusText = data.practice_focus || '';
+          if (data.source_note) {
+            focusText = `${data.source_note} ${focusText}`.trim();
+          } else if (falsettoK) {
+            focusText = `最高音: ${highK} (裏声: ${falsettoK}) / 最低音: ${lowK}。${focusText}`.trim();
+          } else {
+            focusText = `最高音: ${highK} / 最低音: ${lowK}。${focusText}`.trim();
+          }
+
           return {
-            title,
-            artist,
+            title: identifiedTitle,
+            artist: identifiedArtist,
+            identified_title: identifiedTitle,
+            identified_artist: identifiedArtist,
+            tie_up: tieUp,
             lowest_note: normLow,
             highest_note: normHigh,
+            highest_falsetto: falsettoNorm,
             main_range: `${normLow}〜${normHigh}`,
             difficulty: data.difficulty || 3,
             vocal_type: data.vocal_type || vocalType || 'male',
             is_estimate: false,
             source_type: 'gemini',
-            practice_tags: Array.isArray(data.practice_tags) ? data.practice_tags : ['AI解析', '高音'],
-            practice_focus: data.practice_focus || `Google Geminiが楽曲知識からボーカル音域を自動分析しました（最高音: ${highK} / 最低音: ${lowK}）。`
+            practice_tags: Array.isArray(data.practice_tags) ? data.practice_tags : ['音域実測', '高音'],
+            practice_focus: focusText
           };
         }
       }
@@ -1069,6 +1098,11 @@
       aiSongVocalType: document.getElementById('ai-song-vocal-type'),
       btnRunAiEstimate: document.getElementById('btn-run-ai-estimate'),
       aiEstimateResultBox: document.getElementById('ai-estimate-result-box'),
+      aiCandidateTitle: document.getElementById('ai-candidate-title'),
+      aiCandidateArtist: document.getElementById('ai-candidate-artist'),
+      aiCandidateTieupContainer: document.getElementById('ai-candidate-tieup-container'),
+      aiCandidateTieup: document.getElementById('ai-candidate-tieup'),
+      btnCancelAiCandidate: document.getElementById('btn-cancel-ai-candidate'),
       aiEstimateSourceBadge: document.getElementById('ai-estimate-source-badge'),
       aiEstimateAccuracy: document.getElementById('ai-estimate-accuracy'),
       aiEstimateDescription: document.getElementById('ai-estimate-description'),
@@ -1997,13 +2031,32 @@
         
         if (elements.aiEstimateResultBox) {
           elements.aiEstimateResultBox.classList.remove('hidden');
+
+          // もしかしてこの曲？ 候補カードのセット
+          if (elements.aiCandidateTitle) {
+            elements.aiCandidateTitle.textContent = currentEstimatedSong.identified_title || title;
+          }
+          if (elements.aiCandidateArtist) {
+            elements.aiCandidateArtist.textContent = currentEstimatedSong.identified_artist || artist;
+          }
+          if (elements.aiCandidateTieupContainer && elements.aiCandidateTieup) {
+            if (currentEstimatedSong.tie_up) {
+              elements.aiCandidateTieup.textContent = currentEstimatedSong.tie_up;
+              elements.aiCandidateTieupContainer.classList.remove('hidden');
+              elements.aiCandidateTieupContainer.classList.add('flex');
+            } else {
+              elements.aiCandidateTieupContainer.classList.add('hidden');
+              elements.aiCandidateTieupContainer.classList.remove('flex');
+            }
+          }
+
           if (elements.aiResultLow) elements.aiResultLow.value = currentEstimatedSong.lowest_note;
           if (elements.aiResultHigh) elements.aiResultHigh.value = currentEstimatedSong.highest_note;
           if (elements.aiResultDiff) elements.aiResultDiff.value = String(currentEstimatedSong.difficulty);
           
           if (elements.aiEstimateSourceBadge) {
             if (currentEstimatedSong.source_type === 'gemini') {
-              elements.aiEstimateSourceBadge.textContent = 'Google Gemini AI解析完了 🤖';
+              elements.aiEstimateSourceBadge.textContent = 'Google Gemini AI実測照合 🤖';
             } else if (currentEstimatedSong.source_type === 'exact') {
               elements.aiEstimateSourceBadge.textContent = '実測データベース照合完了 🎯';
             } else if (currentEstimatedSong.source_type === 'profile') {
@@ -2015,7 +2068,7 @@
 
           if (elements.aiEstimateAccuracy) {
             if (currentEstimatedSong.source_type === 'gemini') {
-              elements.aiEstimateAccuracy.textContent = 'AIリアルタイム解析';
+              elements.aiEstimateAccuracy.textContent = '実測音域・AI精密特定';
               elements.aiEstimateAccuracy.className = 'text-[10px] text-purple-300 bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-500/30';
             } else if (currentEstimatedSong.source_type === 'exact') {
               elements.aiEstimateAccuracy.textContent = '精度: 極高 (実測)';
@@ -2031,18 +2084,31 @@
           }
 
           if (window.lucide) lucide.createIcons();
-          showToast('音域を分析しました！確認・微調整して追加できます');
+          showToast('楽曲候補を特定しました！内容を確認して追加してください');
         }
+      });
+    }
+
+    // 候補が違った場合の「再入力」ボタン
+    if (elements.btnCancelAiCandidate) {
+      elements.btnCancelAiCandidate.addEventListener('click', () => {
+        if (elements.aiEstimateResultBox) elements.aiEstimateResultBox.classList.add('hidden');
+        currentEstimatedSong = null;
+        if (elements.aiSongTitle) {
+          elements.aiSongTitle.focus();
+          elements.aiSongTitle.select();
+        }
+        showToast('曲名・歌手名を直して再検索してください');
       });
     }
 
     if (elements.formAiAddSong) {
       elements.formAiAddSong.addEventListener('submit', (e) => {
         e.preventDefault();
-        const title = elements.aiSongTitle.value.trim();
-        const artist = elements.aiSongArtist.value.trim();
+        const rawTitle = elements.aiSongTitle.value.trim();
+        const rawArtist = elements.aiSongArtist.value.trim();
         const vocalType = elements.aiSongVocalType.value;
-        if (!title || !artist) return;
+        if (!rawTitle || !rawArtist) return;
 
         // まだ推定結果が表示されていない場合は、まず推定を実行してプレビュー表示
         if (!currentEstimatedSong || (elements.aiEstimateResultBox && elements.aiEstimateResultBox.classList.contains('hidden'))) {
@@ -2051,6 +2117,10 @@
             return;
           }
         }
+
+        // AIが特定した正式な曲名・アーティスト名があれば優先
+        const title = (currentEstimatedSong && currentEstimatedSong.identified_title) ? currentEstimatedSong.identified_title : rawTitle;
+        const artist = (currentEstimatedSong && currentEstimatedSong.identified_artist) ? currentEstimatedSong.identified_artist : rawArtist;
 
         // ユーザーが微調整したセレクトボックスの値を取得
         const low = elements.aiResultLow ? elements.aiResultLow.value : currentEstimatedSong.lowest_note;
