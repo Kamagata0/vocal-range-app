@@ -1116,6 +1116,8 @@
       aiCandidateVocalBadge: document.getElementById('ai-candidate-vocal-badge'),
       aiCandidateTieupContainer: document.getElementById('ai-candidate-tieup-container'),
       aiCandidateTieup: document.getElementById('ai-candidate-tieup'),
+      aiCandidateCorrectedNotice: document.getElementById('ai-candidate-corrected-notice'),
+      aiCandidateCorrectedText: document.getElementById('ai-candidate-corrected-text'),
       btnCancelAiCandidate: document.getElementById('btn-cancel-ai-candidate'),
       aiEstimateSourceBadge: document.getElementById('ai-estimate-source-badge'),
       aiEstimateAccuracy: document.getElementById('ai-estimate-accuracy'),
@@ -2046,12 +2048,23 @@
         if (elements.aiEstimateResultBox) {
           elements.aiEstimateResultBox.classList.remove('hidden');
 
+          const officialTitle = currentEstimatedSong.identified_title || title;
+          const officialArtist = currentEstimatedSong.identified_artist || (artist || 'アーティスト自動特定');
+
+          // ユーザーの入力ボックスの文字を正式名称へ自動書き換え（目で見て修正を確認できるようにする）
+          if (elements.aiSongTitle && currentEstimatedSong.identified_title) {
+            elements.aiSongTitle.value = currentEstimatedSong.identified_title;
+          }
+          if (elements.aiSongArtist && currentEstimatedSong.identified_artist) {
+            elements.aiSongArtist.value = currentEstimatedSong.identified_artist;
+          }
+
           // もしかしてこの曲？ 候補カードのセット
           if (elements.aiCandidateTitle) {
-            elements.aiCandidateTitle.textContent = currentEstimatedSong.identified_title || title;
+            elements.aiCandidateTitle.textContent = officialTitle;
           }
           if (elements.aiCandidateArtist) {
-            elements.aiCandidateArtist.textContent = currentEstimatedSong.identified_artist || (artist || 'アーティスト自動特定');
+            elements.aiCandidateArtist.textContent = officialArtist;
           }
           if (elements.aiCandidateVocalBadge) {
             const vType = currentEstimatedSong.vocal_type || 'male';
@@ -2074,6 +2087,37 @@
             } else {
               elements.aiCandidateTieupContainer.classList.add('hidden');
               elements.aiCandidateTieupContainer.classList.remove('flex');
+            }
+          }
+
+          // 逆入力・スペルミス判定と案内表示
+          const cleanTitle = title.toLowerCase().replace(/[\s\-_・、。！？!?]/g, '');
+          const cleanArtist = artist.toLowerCase().replace(/[\s\-_・、。！？!?]/g, '');
+          const cleanIdentTitle = officialTitle.toLowerCase().replace(/[\s\-_・、。！？!?]/g, '');
+          const cleanIdentArtist = officialArtist.toLowerCase().replace(/[\s\-_・、。！？!?]/g, '');
+
+          const isSwapped = cleanTitle && cleanArtist && (
+            (cleanIdentArtist.includes(cleanTitle) || cleanTitle.includes(cleanIdentArtist)) &&
+            (cleanIdentTitle.includes(cleanArtist) || cleanArtist.includes(cleanIdentTitle))
+          );
+          const isSpellingCorrected = (cleanTitle !== cleanIdentTitle) || (cleanArtist && cleanArtist !== cleanIdentArtist);
+
+          if (elements.aiCandidateCorrectedNotice) {
+            if (isSwapped) {
+              elements.aiCandidateCorrectedNotice.classList.remove('hidden');
+              elements.aiCandidateCorrectedNotice.classList.add('flex');
+              if (elements.aiCandidateCorrectedText) {
+                elements.aiCandidateCorrectedText.textContent = `🔄 曲名と歌手名の「逆入力」を検知し、正しい位置に自動入替しました！`;
+              }
+            } else if (isSpellingCorrected) {
+              elements.aiCandidateCorrectedNotice.classList.remove('hidden');
+              elements.aiCandidateCorrectedNotice.classList.add('flex');
+              if (elements.aiCandidateCorrectedText) {
+                elements.aiCandidateCorrectedText.textContent = `✨ 誤字・略称を検知し、正式な曲名と歌手名に自動補正しました！`;
+              }
+            } else {
+              elements.aiCandidateCorrectedNotice.classList.add('hidden');
+              elements.aiCandidateCorrectedNotice.classList.remove('flex');
             }
           }
 
@@ -2111,7 +2155,13 @@
           }
 
           if (window.lucide) lucide.createIcons();
-          showToast('楽曲候補を特定しました！内容を確認して追加してください');
+          if (isSwapped) {
+            showToast('曲名とアーティストの逆入力を自動修正しました！');
+          } else if (isSpellingCorrected) {
+            showToast('正式な曲名・アーティスト名に自動補正しました！');
+          } else {
+            showToast('楽曲候補を特定しました！内容を確認して追加してください');
+          }
         }
       });
     }
