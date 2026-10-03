@@ -818,16 +818,23 @@
           </div>
 
           <div>
-            <label class="text-slate-300 font-medium block mb-1">アーティスト名 <span class="text-rose-400">*</span></label>
-            <input type="text" id="ai-song-artist" required placeholder="例: tuki.、Omoinotake、Ado、Creepy Nuts" class="w-full px-3 py-2 bg-surface-input border border-surface-border rounded-xl text-white focus:outline-none focus:border-purple-500">
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-slate-300 font-medium">アーティスト名</label>
+              <span class="text-[10px] text-slate-400 font-normal">※省略してもAIが特定可能</span>
+            </div>
+            <input type="text" id="ai-song-artist" placeholder="例: tuki.、Omoinotake、Ado、Creepy Nuts（省略可）" class="w-full px-3 py-2 bg-surface-input border border-surface-border rounded-xl text-white focus:outline-none focus:border-purple-500">
           </div>
 
           <div>
-            <label class="text-slate-300 font-medium block mb-1">ボーカルタイプ</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="text-slate-300 font-medium">ボーカル区分</label>
+              <span class="text-[10px] text-purple-300 font-bold bg-purple-950/60 px-2 py-0.5 rounded-full border border-purple-500/30">✨ AI自動判定（選択不要）</span>
+            </div>
             <select id="ai-song-vocal-type" class="w-full px-3 py-2 bg-surface-input border border-surface-border rounded-xl text-white focus:outline-none focus:border-purple-500">
-              <option value="male">男性ボーカル</option>
-              <option value="female">女性ボーカル</option>
-              <option value="duet">デュエット／その他</option>
+              <option value="auto" selected>✨ 自動判定（AIにおまかせ・選択不要）</option>
+              <option value="male">男性ボーカル（手動指定）</option>
+              <option value="female">女性ボーカル（手動指定）</option>
+              <option value="duet">デュエット／その他（手動指定）</option>
             </select>
           </div>
 
@@ -848,9 +855,12 @@
 
             <!-- もしかしてこの曲？ 候補カード -->
             <div class="p-3 bg-purple-950/30 rounded-xl border border-purple-500/30 space-y-1.5">
-              <div class="text-[10px] font-bold text-purple-300 flex items-center gap-1">
-                <i data-lucide="help-circle" class="w-3.5 h-3.5 text-purple-400"></i>
-                <span>もしかしてこちらの楽曲ですか？</span>
+              <div class="flex items-center justify-between">
+                <div class="text-[10px] font-bold text-purple-300 flex items-center gap-1">
+                  <i data-lucide="help-circle" class="w-3.5 h-3.5 text-purple-400"></i>
+                  <span>もしかしてこちらの楽曲ですか？</span>
+                </div>
+                <span id="ai-candidate-vocal-badge" class="text-[10px] px-2 py-0.5 rounded-full font-bold bg-purple-500/20 text-purple-300 border border-purple-500/30">判定中</span>
               </div>
               <div class="flex flex-col">
                 <span id="ai-candidate-title" class="text-sm font-bold text-white tracking-wide"></span>
@@ -1153,7 +1163,7 @@
 
   </div>
 
-  <script src="js/app.js?v=15"></script>
+  <script src="js/app.js?v=16"></script>
 </body>
 
 </html>

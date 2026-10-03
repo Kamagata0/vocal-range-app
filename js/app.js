@@ -773,17 +773,28 @@
     }
 
     // 2. Cloudflare Worker経由でGoogle Gemini APIを呼び出し（実測データ制約＆正式名判定）
-    try {
+    const callApi = async () => {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 12000);
+      const payloadVocalType = (!vocalType || vocalType === 'auto') ? '自動判定' : vocalType;
 
       const res = await fetch(WORKER_AI_ENDPOINT, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, artist, vocalType }),
+        body: JSON.stringify({ title, artist: artist || '', vocalType: payloadVocalType }),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
+      return res;
+    };
+
+    try {
+      let res = await callApi();
+      if (res.status === 503) {
+        // 一時的混雑の場合は少し待って1度リトライ
+        await new Promise(r => setTimeout(r, 1200));
+        res = await callApi();
+      }
 
       if (res.ok) {
         const text = await res.text();
@@ -811,6 +822,8 @@
             focusText = `最高音: ${highK} / 最低音: ${lowK}。${focusText}`.trim();
           }
 
+          const detectedVocal = data.vocal_type || (vocalType && vocalType !== 'auto' ? vocalType : 'male');
+
           return {
             title: identifiedTitle,
             artist: identifiedArtist,
@@ -822,7 +835,7 @@
             highest_falsetto: falsettoNorm,
             main_range: `${normLow}〜${normHigh}`,
             difficulty: data.difficulty || 3,
-            vocal_type: data.vocal_type || vocalType || 'male',
+            vocal_type: detectedVocal,
             is_estimate: false,
             source_type: 'gemini',
             practice_tags: Array.isArray(data.practice_tags) ? data.practice_tags : ['音域実測', '高音'],
@@ -1100,6 +1113,7 @@
       aiEstimateResultBox: document.getElementById('ai-estimate-result-box'),
       aiCandidateTitle: document.getElementById('ai-candidate-title'),
       aiCandidateArtist: document.getElementById('ai-candidate-artist'),
+      aiCandidateVocalBadge: document.getElementById('ai-candidate-vocal-badge'),
       aiCandidateTieupContainer: document.getElementById('ai-candidate-tieup-container'),
       aiCandidateTieup: document.getElementById('ai-candidate-tieup'),
       btnCancelAiCandidate: document.getElementById('btn-cancel-ai-candidate'),
@@ -2004,10 +2018,10 @@
     if (elements.btnRunAiEstimate) {
       elements.btnRunAiEstimate.addEventListener('click', async () => {
         const title = elements.aiSongTitle.value.trim();
-        const artist = elements.aiSongArtist.value.trim();
-        const vocalType = elements.aiSongVocalType.value;
-        if (!title || !artist) {
-          showToast('曲名とアーティスト名を入力してください');
+        const artist = elements.aiSongArtist ? elements.aiSongArtist.value.trim() : '';
+        const vocalType = elements.aiSongVocalType ? elements.aiSongVocalType.value : 'auto';
+        if (!title) {
+          showToast('曲名を入力してください');
           return;
         }
 
@@ -2037,7 +2051,20 @@
             elements.aiCandidateTitle.textContent = currentEstimatedSong.identified_title || title;
           }
           if (elements.aiCandidateArtist) {
-            elements.aiCandidateArtist.textContent = currentEstimatedSong.identified_artist || artist;
+            elements.aiCandidateArtist.textContent = currentEstimatedSong.identified_artist || (artist || 'アーティスト自動特定');
+          }
+          if (elements.aiCandidateVocalBadge) {
+            const vType = currentEstimatedSong.vocal_type || 'male';
+            if (vType === 'female') {
+              elements.aiCandidateVocalBadge.textContent = '👩 女性ボーカル';
+              elements.aiCandidateVocalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-pink-500/20 text-pink-300 border border-pink-500/30';
+            } else if (vType === 'duet') {
+              elements.aiCandidateVocalBadge.textContent = '👥 デュエット';
+              elements.aiCandidateVocalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30';
+            } else {
+              elements.aiCandidateVocalBadge.textContent = '👨 男性ボーカル';
+              elements.aiCandidateVocalBadge.className = 'text-[10px] px-2 py-0.5 rounded-full font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/30';
+            }
           }
           if (elements.aiCandidateTieupContainer && elements.aiCandidateTieup) {
             if (currentEstimatedSong.tie_up) {
@@ -2106,9 +2133,9 @@
       elements.formAiAddSong.addEventListener('submit', (e) => {
         e.preventDefault();
         const rawTitle = elements.aiSongTitle.value.trim();
-        const rawArtist = elements.aiSongArtist.value.trim();
-        const vocalType = elements.aiSongVocalType.value;
-        if (!rawTitle || !rawArtist) return;
+        const rawArtist = elements.aiSongArtist ? elements.aiSongArtist.value.trim() : '';
+        const vocalType = elements.aiSongVocalType ? elements.aiSongVocalType.value : 'auto';
+        if (!rawTitle) return;
 
         // まだ推定結果が表示されていない場合は、まず推定を実行してプレビュー表示
         if (!currentEstimatedSong || (elements.aiEstimateResultBox && elements.aiEstimateResultBox.classList.contains('hidden'))) {
@@ -2120,7 +2147,8 @@
 
         // AIが特定した正式な曲名・アーティスト名があれば優先
         const title = (currentEstimatedSong && currentEstimatedSong.identified_title) ? currentEstimatedSong.identified_title : rawTitle;
-        const artist = (currentEstimatedSong && currentEstimatedSong.identified_artist) ? currentEstimatedSong.identified_artist : rawArtist;
+        const artist = (currentEstimatedSong && currentEstimatedSong.identified_artist) ? currentEstimatedSong.identified_artist : (rawArtist || 'アーティスト不明');
+        const chosenVocalType = (vocalType && vocalType !== 'auto') ? vocalType : (currentEstimatedSong.vocal_type || 'male');
 
         // ユーザーが微調整したセレクトボックスの値を取得
         const low = elements.aiResultLow ? elements.aiResultLow.value : currentEstimatedSong.lowest_note;
@@ -2136,7 +2164,7 @@
           highest_note: high,
           main_range: `${low}〜${high}`,
           difficulty: diff,
-          vocal_type: vocalType,
+          vocal_type: chosenVocalType,
           is_estimate: currentEstimatedSong.source_type !== 'exact',
           practice_tags: currentEstimatedSong.practice_tags || ['高音', '安定感'],
           practice_focus: `${currentEstimatedSong.practice_focus} (登録音域: ${lowK}〜${highK})`
